@@ -1,0 +1,1481 @@
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Full-Stack Fundamentals — Units 6–11</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&amp;family=Space+Mono:wght@400;700&amp;family=DM+Sans:wght@300;400;500&amp;display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080808;
+    --surface: #111111;
+    --surface2: #181818;
+    --border: #222222;
+    --text: #e2e2e2;
+    --muted: #666;
+    --accent: #FFE566;
+    --accent2: #66FFB2;
+    --accent3: #FF6B6B;
+    --accent4: #6B9FFF;
+    --code-bg: #0e0e0e;
+    --font-head: 'Syne', sans-serif;
+    --font-mono: 'Space Mono', monospace;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ─── SCROLLBAR ─────────────────────── */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 2px; }
+
+  /* ─── NAV ─────────────────────────────── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(8,8,8,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 2rem; height: 56px;
+  }
+  .nav-logo {
+    font-family: var(--font-head);
+    font-weight: 800; font-size: 1rem;
+    color: var(--accent); letter-spacing: 0.05em;
+  }
+  .nav-links {
+    display: flex; gap: 0.25rem; list-style: none;
+  }
+  .nav-links a {
+    color: var(--muted); text-decoration: none;
+    font-family: var(--font-mono); font-size: 0.72rem;
+    padding: 0.3rem 0.7rem; border-radius: 4px;
+    transition: color 0.2s, background 0.2s;
+    border: 1px solid transparent;
+  }
+  .nav-links a:hover {
+    color: var(--accent); border-color: var(--accent);
+    background: rgba(255,229,102,0.05);
+  }
+
+  /* ─── HERO ─────────────────────────────── */
+  .hero {
+    min-height: 100vh; display: flex; flex-direction: column;
+    justify-content: center; align-items: flex-start;
+    padding: 8rem 6rem 5rem;
+    border-bottom: 1px solid var(--border);
+    position: relative; overflow: hidden;
+  }
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 60px 60px;
+    opacity: 0.3;
+    animation: gridPulse 8s ease-in-out infinite;
+  }
+  @keyframes gridPulse {
+    0%,100% { opacity: 0.3; }
+    50% { opacity: 0.15; }
+  }
+  .hero-tag {
+    font-family: var(--font-mono); font-size: 0.75rem;
+    color: var(--accent); letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: 1px solid var(--accent);
+    padding: 0.3rem 0.8rem; border-radius: 2px;
+    margin-bottom: 2rem; position: relative;
+    animation: fadeUp 0.6s ease both;
+  }
+  .hero h1 {
+    font-family: var(--font-head); font-weight: 800;
+    font-size: clamp(3rem, 8vw, 7rem);
+    line-height: 0.95; letter-spacing: -0.03em;
+    position: relative;
+    animation: fadeUp 0.7s 0.1s ease both;
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero-sub {
+    max-width: 540px; margin-top: 1.5rem;
+    color: var(--muted); font-size: 1.05rem;
+    animation: fadeUp 0.7s 0.2s ease both;
+  }
+  .hero-units {
+    display: flex; gap: 0.75rem; flex-wrap: wrap;
+    margin-top: 2.5rem; position: relative;
+    animation: fadeUp 0.7s 0.3s ease both;
+  }
+  .hero-unit-chip {
+    font-family: var(--font-mono); font-size: 0.75rem;
+    padding: 0.5rem 1rem; border: 1px solid var(--border);
+    border-radius: 2px; color: var(--muted);
+    cursor: pointer; transition: all 0.2s;
+    text-decoration: none;
+  }
+  .hero-unit-chip:hover {
+    border-color: var(--accent); color: var(--accent);
+    background: rgba(255,229,102,0.05);
+  }
+  .scroll-hint {
+    position: absolute; bottom: 2.5rem; left: 6rem;
+    font-family: var(--font-mono); font-size: 0.7rem;
+    color: var(--muted); display: flex; align-items: center; gap: 0.5rem;
+    animation: bounceY 2s ease-in-out infinite;
+  }
+  @keyframes bounceY {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(6px); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── SECTIONS ─────────────────────────── */
+  section {
+    padding: 6rem;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  .section-number {
+    font-family: var(--font-mono); font-size: 0.7rem;
+    color: var(--muted); letter-spacing: 0.15em;
+    text-transform: uppercase; margin-bottom: 0.75rem;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .section-number::before {
+    content: ''; display: inline-block; width: 24px; height: 1px;
+    background: var(--muted);
+  }
+  h2 {
+    font-family: var(--font-head); font-weight: 800;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    line-height: 1.05; letter-spacing: -0.03em;
+    margin-bottom: 3rem;
+  }
+  h2 .hl { color: var(--accent); }
+  h3 {
+    font-family: var(--font-head); font-weight: 700;
+    font-size: 1.3rem; margin-bottom: 1rem;
+    color: var(--text);
+  }
+
+  /* ─── REVEAL ANIMATION ──────────────────── */
+  .reveal {
+    opacity: 0; transform: translateY(32px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible {
+    opacity: 1; transform: translateY(0);
+  }
+
+  /* ─── CODE BLOCK ────────────────────────── */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px; overflow: hidden;
+    font-family: var(--font-mono); font-size: 0.8rem;
+    line-height: 1.7;
+  }
+  .code-header {
+    background: var(--surface);
+    padding: 0.6rem 1rem;
+    display: flex; align-items: center; gap: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .code-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-r { background: #FF5F57; }
+  .dot-y { background: #FEBC2E; }
+  .dot-g { background: #28C840; }
+  .code-label {
+    font-size: 0.7rem; color: var(--muted);
+    margin-left: auto;
+  }
+  .code-body { padding: 1.25rem 1.5rem; }
+  .code-body pre { white-space: pre-wrap; }
+
+  /* Syntax colors */
+  .kw { color: #FF6B6B; }
+  .fn { color: #66FFB2; }
+  .str { color: #FFE566; }
+  .cm { color: #555; font-style: italic; }
+  .num { color: #6B9FFF; }
+  .prop { color: #c792ea; }
+  .tag { color: #82aaff; }
+
+  /* ─── TWO COL LAYOUT ────────────────────── */
+  .two-col {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 3rem;
+    align-items: start;
+  }
+  .three-col {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;
+  }
+
+  /* ─── CARDS ─────────────────────────────── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px; padding: 1.5rem;
+  }
+  .card-accent { border-left: 3px solid var(--accent); }
+  .card-green { border-left: 3px solid var(--accent2); }
+  .card-red { border-left: 3px solid var(--accent3); }
+  .card-blue { border-left: 3px solid var(--accent4); }
+
+  /* ─── TABLE ──────────────────────────────── */
+  .compare-table {
+    width: 100%; border-collapse: collapse;
+    font-size: 0.875rem;
+  }
+  .compare-table th {
+    background: var(--surface);
+    font-family: var(--font-mono); font-size: 0.75rem;
+    letter-spacing: 0.05em; text-transform: uppercase;
+    color: var(--accent); padding: 0.75rem 1rem;
+    border: 1px solid var(--border); text-align: left;
+  }
+  .compare-table td {
+    padding: 0.75rem 1rem; border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .compare-table tr:hover td { background: var(--surface); color: var(--text); }
+
+  /* ─── REDUX DIAGRAM ─────────────────────── */
+  .redux-flow {
+    display: flex; align-items: center; gap: 0;
+    padding: 2.5rem 0; overflow-x: auto;
+    scrollbar-width: thin;
+  }
+  .flow-node {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px; padding: 1.2rem 1.5rem;
+    text-align: center; min-width: 130px;
+    position: relative; flex-shrink: 0;
+    transition: border-color 0.3s;
+  }
+  .flow-node:hover { border-color: var(--accent); }
+  .flow-node .fn-icon {
+    font-size: 1.8rem; display: block; margin-bottom: 0.5rem;
+  }
+  .flow-node .fn-title {
+    font-family: var(--font-head); font-weight: 700;
+    font-size: 0.95rem; color: var(--text);
+  }
+  .flow-node .fn-sub {
+    font-family: var(--font-mono); font-size: 0.65rem;
+    color: var(--muted); margin-top: 0.25rem;
+  }
+  .flow-node.active .fn-title { color: var(--accent); }
+  .flow-node.active { border-color: var(--accent); }
+
+  .flow-arrow {
+    width: 60px; height: 2px;
+    background: var(--border); position: relative;
+    flex-shrink: 0; margin-top: 0;
+  }
+  .flow-arrow::after {
+    content: '';
+    position: absolute; right: -1px; top: -4px;
+    border: 5px solid transparent;
+    border-left-color: var(--border);
+  }
+  .flow-arrow .arrow-label {
+    position: absolute; bottom: 8px; left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-mono); font-size: 0.58rem;
+    color: var(--muted); white-space: nowrap;
+    background: var(--bg); padding: 0 3px;
+  }
+  .arrow-animated {
+    background: var(--accent);
+    animation: arrowPulse 2s ease-in-out infinite;
+  }
+  .arrow-animated::after { border-left-color: var(--accent); }
+  @keyframes arrowPulse {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* ─── ANIMATED COUNTER DEMO ─────────────── */
+  .counter-demo {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px; padding: 2rem;
+    text-align: center;
+    position: relative;
+  }
+  .counter-demo::before {
+    content: 'REDUX STORE';
+    position: absolute; top: -1px; left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-mono); font-size: 0.6rem;
+    letter-spacing: 0.12em; color: var(--accent);
+    background: var(--surface2);
+    padding: 0 0.75rem; border: 1px solid var(--accent);
+    border-top: none; border-radius: 0 0 4px 4px;
+  }
+  .counter-display {
+    font-family: var(--font-mono); font-size: 4rem;
+    font-weight: 700; color: var(--accent);
+    line-height: 1; margin: 1rem 0;
+    transition: transform 0.1s ease;
+  }
+  .counter-display.bump { transform: scale(1.15); }
+  .demo-btns { display: flex; gap: 0.75rem; justify-content: center; }
+  .demo-btn {
+    font-family: var(--font-mono); font-size: 1.2rem;
+    width: 48px; height: 48px;
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text); border-radius: 4px; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .demo-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .demo-btn:active { transform: scale(0.94); }
+  .counter-log {
+    margin-top: 1rem;
+    font-family: var(--font-mono); font-size: 0.72rem;
+    color: var(--muted); max-height: 90px; overflow-y: auto;
+    text-align: left; background: var(--code-bg);
+    border: 1px solid var(--border); border-radius: 4px;
+    padding: 0.6rem 0.75rem;
+  }
+  .log-entry { animation: slideIn 0.3s ease; }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-8px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  /* ─── TERMINAL ─────────────────────────── */
+  .terminal {
+    background: #0a0a0a;
+    border: 1px solid #1a1a1a;
+    border-radius: 6px; overflow: hidden;
+    font-family: var(--font-mono); font-size: 0.8rem;
+  }
+  .terminal-header {
+    background: #141414; padding: 0.6rem 1rem;
+    display: flex; gap: 0.4rem; align-items: center;
+    border-bottom: 1px solid #1a1a1a;
+  }
+  .terminal-body { padding: 1rem 1.25rem; }
+  .t-line { display: flex; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.4rem; }
+  .t-prompt { color: var(--accent2); flex-shrink: 0; }
+  .t-cmd { color: var(--text); }
+  .t-output { color: var(--muted); padding-left: 1.25rem; margin-bottom: 0.4rem; }
+  .t-success { color: var(--accent2); }
+  .t-info { color: var(--accent4); }
+  .t-warn { color: #FFB366; }
+  .cursor {
+    display: inline-block; width: 8px; height: 14px;
+    background: var(--accent); vertical-align: text-bottom;
+    animation: blink 1s step-end infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* ─── MIDDLEWARE PIPELINE ─────────────── */
+  .pipeline {
+    display: flex; flex-direction: column; gap: 0;
+    position: relative;
+  }
+  .pipe-node {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px; padding: 1rem 1.5rem;
+    display: flex; align-items: center; gap: 1rem;
+    position: relative; cursor: default;
+    transition: border-color 0.3s;
+  }
+  .pipe-node:not(:last-child)::after {
+    content: '↓';
+    position: absolute; bottom: -20px; left: 50%;
+    transform: translateX(-50%);
+    color: var(--muted); font-size: 1rem;
+    z-index: 1;
+  }
+  .pipe-node + .pipe-node { margin-top: 24px; }
+  .pipe-node.active { border-color: var(--accent2); }
+  .pipe-node.active .pipe-icon { color: var(--accent2); }
+  .pipe-icon { font-size: 1.5rem; width: 2.5rem; text-align: center; }
+  .pipe-info { flex: 1; }
+  .pipe-title { font-family: var(--font-head); font-weight: 700; font-size: 0.95rem; }
+  .pipe-desc { font-size: 0.8rem; color: var(--muted); font-family: var(--font-mono); }
+  .pipe-badge {
+    font-family: var(--font-mono); font-size: 0.65rem;
+    padding: 0.2rem 0.5rem; border-radius: 2px;
+    border: 1px solid var(--border); color: var(--muted);
+  }
+  .pipe-badge.must { border-color: var(--accent3); color: var(--accent3); }
+
+  /* ─── MONGODB DOC ────────────────────── */
+  .mongo-doc {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px; padding: 1.5rem;
+    font-family: var(--font-mono); font-size: 0.8rem;
+    position: relative; overflow: hidden;
+  }
+  .mongo-doc::before {
+    content: 'document';
+    position: absolute; top: 0.5rem; right: 0.75rem;
+    font-size: 0.6rem; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .doc-field {
+    display: flex; gap: 1rem; padding: 0.3rem 0;
+    border-bottom: 1px solid #1a1a1a; align-items: flex-start;
+    opacity: 0; transform: translateX(-8px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+  .doc-field.show { opacity: 1; transform: translateX(0); }
+  .doc-key { color: #c792ea; min-width: 100px; }
+  .doc-val-str { color: var(--accent); }
+  .doc-val-num { color: var(--accent4); }
+  .doc-val-bool { color: var(--accent2); }
+  .doc-val-id { color: var(--muted); font-size: 0.7rem; }
+
+  /* ─── REST TABLE ────────────────────── */
+  .rest-row {
+    display: grid;
+    grid-template-columns: 80px 200px 1fr;
+    gap: 0; border-bottom: 1px solid var(--border);
+    transition: background 0.2s;
+  }
+  .rest-row:hover { background: var(--surface); }
+  .rest-method, .rest-path, .rest-desc {
+    padding: 0.85rem 1rem;
+    font-family: var(--font-mono); font-size: 0.8rem;
+    border-right: 1px solid var(--border);
+  }
+  .rest-method { font-weight: 700; text-align: center; }
+  .rest-path { color: var(--text); }
+  .rest-desc { color: var(--muted); border-right: none; }
+  .m-get { color: var(--accent2); }
+  .m-post { color: var(--accent4); }
+  .m-put { color: #FFB366; }
+  .m-delete { color: var(--accent3); }
+
+  /* ─── FOLDER TREE ──────────────────── */
+  .tree { font-family: var(--font-mono); font-size: 0.82rem; }
+  .tree-item {
+    padding: 0.3rem 0; display: flex; align-items: center; gap: 0.5rem;
+    opacity: 0; transform: translateX(-10px);
+    transition: opacity 0.4s, transform 0.4s;
+  }
+  .tree-item.show { opacity: 1; transform: translateX(0); }
+  .tree-icon { width: 18px; text-align: center; }
+  .tree-folder { color: var(--accent4); }
+  .tree-file { color: var(--muted); }
+  .tree-arrow { color: var(--accent); font-size: 0.7rem; }
+  .tree-desc { color: #444; font-size: 0.72rem; margin-left: 0.5rem; }
+
+  /* ─── CHEATSHEET ──────────────────── */
+  .cheat-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+  }
+  .cheat-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px; padding: 1.1rem 1.25rem;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .cheat-item:hover {
+    border-color: var(--accent);
+    transform: translateY(-3px);
+  }
+  .cheat-concept {
+    font-family: var(--font-mono); font-size: 0.8rem;
+    color: var(--accent); margin-bottom: 0.5rem;
+    display: flex; align-items: center; gap: 0.4rem;
+  }
+  .cheat-concept::before {
+    content: '';
+    display: inline-block; width: 6px; height: 6px;
+    border-radius: 50%; background: var(--accent); flex-shrink: 0;
+  }
+  .cheat-def { font-size: 0.85rem; color: var(--muted); line-height: 1.5; }
+
+  /* ─── PROGRESS BAR ─────────────────── */
+  .progress-bar {
+    position: fixed; top: 0; left: 0; height: 2px;
+    background: var(--accent); z-index: 200;
+    transition: width 0.1s;
+  }
+
+  /* ─── TOOLTIP ──────────────────────── */
+  .tooltip {
+    position: relative; cursor: help;
+    border-bottom: 1px dashed var(--muted);
+  }
+  .tooltip::after {
+    content: attr(data-tip);
+    position: absolute; bottom: 120%; left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface2); border: 1px solid var(--border);
+    padding: 0.4rem 0.75rem; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.7rem;
+    color: var(--text); white-space: nowrap;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .tooltip:hover::after { opacity: 1; }
+
+  /* ─── BADGES ──────────────────────── */
+  .badge {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    font-family: var(--font-body); font-size: 0.72rem; font-weight: 500;
+    padding: 0.2rem 0.65rem; border-radius: 20px; margin-left: 0.6rem;
+    vertical-align: middle; letter-spacing: 0;
+    animation: badgePop 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+  @keyframes badgePop {
+    from { transform: scale(0.7); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+  }
+  .badge-exam {
+    background: rgba(255,229,102,0.12);
+    color: var(--accent);
+    border: 1px solid rgba(255,229,102,0.35);
+  }
+  .badge-tip { background: rgba(102,255,178,0.1); color: var(--accent2); border: 1px solid rgba(102,255,178,0.25); }
+
+  /* ─── SECTION ACCENT LINE ─────────── */
+  .section-line {
+    width: 40px; height: 3px;
+    background: var(--accent); margin-bottom: 1.5rem;
+  }
+
+  /* ─── CALLOUT ─────────────────────── */
+  .callout {
+    background: rgba(255,229,102,0.04);
+    border: 1px solid rgba(255,229,102,0.18);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    padding: 1rem 1.25rem;
+    margin: 1.5rem 0; font-size: 0.9rem;
+    position: relative;
+  }
+  .callout strong { color: var(--accent); }
+
+  /* ─── RESPONSIVE ──────────────────── */
+  @media (max-width: 900px) {
+    nav { padding: 0 1rem; }
+    .nav-links { display: none; }
+    section { padding: 4rem 1.5rem; }
+    .hero { padding: 7rem 1.5rem 4rem; }
+    .scroll-hint { left: 1.5rem; }
+    .two-col { grid-template-columns: 1fr; gap: 2rem; }
+    .three-col { grid-template-columns: 1fr; }
+    .redux-flow { padding-bottom: 1rem; }
+  }
+
+  @media (max-width: 600px) {
+    section { padding: 3rem 1.25rem; }
+    .hero { padding: 6rem 1.25rem 3rem; }
+    .code-body { padding: 1rem; }
+    .code-body pre { font-size: 0.72rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Progress Bar -->
+<div class="progress-bar" id="progress" style="width: 10.0283%;"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">FS / 6–11</div>
+  <ul class="nav-links">
+    <li><a href="#redux" style="color: var(--accent);">U6 Redux</a></li>
+    <li><a href="#libraries">U7 Libraries</a></li>
+    <li><a href="#npm">U8 npm</a></li>
+    <li><a href="#node">U9 Node/Express</a></li>
+    <li><a href="#mongo">U10 MongoDB</a></li>
+    <li><a href="#project">U11 Project</a></li>
+    <li><a href="#cheatsheet">Cheatsheet</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<header class="hero" id="top">
+  <div class="hero-grid"></div>
+  <div class="hero-tag">Full-Stack Fundamentals</div>
+  <h1>Units <span>6 – 11</span><br>Explained.</h1>
+  <p class="hero-sub">Redux, Libraries, npm, Node.js, MongoDB, REST APIs — all the concepts you need, with live examples and visual diagrams. If you know HTML/CSS/JS, you're ready.</p>
+  <div class="hero-units">
+    <a href="#redux" class="hero-unit-chip">U6 · Redux</a>
+    <a href="#libraries" class="hero-unit-chip">U7 · Libraries</a>
+    <a href="#npm" class="hero-unit-chip">U8 · npm</a>
+    <a href="#node" class="hero-unit-chip">U9 · Node.js</a>
+    <a href="#mongo" class="hero-unit-chip">U10 · MongoDB</a>
+    <a href="#project" class="hero-unit-chip">U11 · Project</a>
+  </div>
+  <div class="scroll-hint">↓ scroll to begin</div>
+</header>
+
+<!-- ╔══════════════════════════════════════╗ -->
+<!-- ║  UNIT 6 — REDUX                      ║ -->
+<!-- ╚══════════════════════════════════════╝ -->
+<section id="redux">
+  <div class="section-number">Unit 06</div>
+  <h2>Re<span class="hl">dux</span><br>Global State <span class="hl">Management</span></h2>
+
+  <div class="reveal two-col visible">
+    <div>
+      <div class="section-line"></div>
+      <h3>The Problem: Props Drilling 🕳️</h3>
+      <p style="color:var(--muted); margin-bottom:1rem;">Imagine passing data from a <strong>grandparent</strong> component all the way down to a <strong>grandchild</strong> — through every middle component that doesn't even need it. That's props drilling, and it's a nightmare in large apps.</p>
+      <div class="callout">
+        <strong>The Bank Analogy:</strong> You don't walk into a bank vault yourself. You submit a <em>request</em> (Action), a teller processes it (Reducer), and the balance updates in the system (Store). Same idea.
+      </div>
+      <h3 style="margin-top:2rem;">4 Core Concepts</h3>
+      <div style="display:flex; flex-direction:column; gap:0.75rem; margin-top:1rem;">
+        <div class="card card-accent">
+          <strong style="font-family:var(--font-mono);color:var(--accent);">Store</strong>
+          <p style="color:var(--muted);font-size:0.85rem;margin-top:0.3rem;">The single vault. All your app's state lives here. One source of truth.</p>
+        </div>
+        <div class="card card-blue">
+          <strong style="font-family:var(--font-mono);color:var(--accent4);">Action</strong>
+          <p style="color:var(--muted);font-size:0.85rem;margin-top:0.3rem;">A plain object: <code style="color:var(--accent4);">{ type: "INCREMENT" }</code>. Describes what happened.</p>
+        </div>
+        <div class="card card-green">
+          <strong style="font-family:var(--font-mono);color:var(--accent2);">Reducer</strong>
+          <p style="color:var(--muted);font-size:0.85rem;margin-top:0.3rem;">A <em>pure function</em>: takes <code>(state, action)</code> → returns new state. <strong style="color:var(--accent3);">Never mutates!</strong></p>
+        </div>
+        <div class="card card-red">
+          <strong style="font-family:var(--font-mono);color:var(--accent3);">Dispatch</strong>
+          <p style="color:var(--muted);font-size:0.85rem;margin-top:0.3rem;">How you <em>trigger</em> an action: <code style="color:var(--accent3);">dispatch(increment())</code></p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <!-- LIVE DEMO -->
+      <div class="counter-demo" style="margin-bottom:1.5rem;">
+        <div style="font-family:var(--font-mono);font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-top:0.25rem;">state.counter</div>
+        <div class="counter-display" id="counterDisplay">0</div>
+        <div class="demo-btns">
+          <button class="demo-btn" onclick="reduxDecrement()">−</button>
+          <button class="demo-btn" onclick="reduxReset()" style="font-size:0.7rem;width:auto;padding:0 0.75rem;">RESET</button>
+          <button class="demo-btn" onclick="reduxIncrement()">+</button>
+        </div>
+        <div class="counter-log" id="counterLog"><div class="log-entry"><span style="color:var(--accent3)">dispatch</span>(<span style="color:var(--accent)">reset()</span>) → state: <span style="color:var(--accent4)">0</span></div><div class="log-entry"><span style="color:var(--accent3)">dispatch</span>(<span style="color:var(--accent)">increment()</span>) → state: <span style="color:var(--accent4)">1</span></div>
+          <div style="color:var(--muted);">// dispatch log will appear here</div>
+        </div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div>
+          <span class="code-label">counterSlice.js</span>
+        </div>
+        <div class="code-body"><pre><span class="kw">const</span> <span class="fn">counterSlice</span> = <span class="fn">createSlice</span>({
+  <span class="prop">name</span>: <span class="str">"counter"</span>,
+  <span class="prop">initialState</span>: <span class="num">0</span>,
+  <span class="prop">reducers</span>: {
+    <span class="fn">increment</span>: (<span class="prop">state</span>) =&gt; state + <span class="num">1</span>,
+    <span class="fn">decrement</span>: (<span class="prop">state</span>) =&gt; state - <span class="num">1</span>,
+  }
+})
+<span class="kw">export const</span> { <span class="fn">increment</span>, <span class="fn">decrement</span> } = counterSlice.actions
+
+<span class="cm">// In your component:</span>
+<span class="kw">const</span> count = <span class="fn">useSelector</span>(s =&gt; s.counter) <span class="cm">// READ</span>
+<span class="kw">const</span> dispatch = <span class="fn">useDispatch</span>()              <span class="cm">// WRITE</span>
+<span class="fn">dispatch</span>(<span class="fn">increment</span>())</pre></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DATA FLOW DIAGRAM -->
+  <div class="reveal" style="margin-top:3rem;">
+    <h3>Data Flow Visualized <span class="badge badge-exam">⚡ yeh padhlo, kaam ayega</span></h3>
+    <div class="redux-flow" style="margin-top:1.5rem;">
+      <div class="flow-node" id="fn-component">
+        <span class="fn-icon">🖥️</span>
+        <div class="fn-title">Component</div>
+        <div class="fn-sub">calls dispatch()</div>
+      </div>
+      <div class="flow-arrow arrow-animated"><span class="arrow-label">dispatch(action)</span></div>
+      <div class="flow-node" id="fn-action">
+        <span class="fn-icon">📨</span>
+        <div class="fn-title">Action</div>
+        <div class="fn-sub">{ type: "INC" }</div>
+      </div>
+      <div class="flow-arrow arrow-animated"><span class="arrow-label">sent to</span></div>
+      <div class="flow-node" id="fn-reducer">
+        <span class="fn-icon">⚙️</span>
+        <div class="fn-title">Reducer</div>
+        <div class="fn-sub">pure function</div>
+      </div>
+      <div class="flow-arrow arrow-animated"><span class="arrow-label">new state</span></div>
+      <div class="flow-node" id="fn-store">
+        <span class="fn-icon">🏦</span>
+        <div class="fn-title">Store</div>
+        <div class="fn-sub">state updated</div>
+      </div>
+      <div class="flow-arrow arrow-animated"><span class="arrow-label">re-render</span></div>
+      <div class="flow-node" id="fn-ui">
+        <span class="fn-icon">🔄</span>
+        <div class="fn-title">UI Updates</div>
+        <div class="fn-sub">useSelector()</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Context vs Redux table -->
+  <div class="reveal" style="margin-top:3rem;">
+    <h3>Redux vs Context API <span class="badge badge-exam">⚡ yeh padhlo, kaam ayega</span></h3>
+    <table class="compare-table" style="margin-top:1rem;">
+      <tbody><tr><th>Feature</th><th>Context API</th><th>Redux</th></tr>
+      <tr><td>Best for</td><td>Small apps</td><td>Large apps</td></tr>
+      <tr><td>Debugging</td><td>Limited</td><td>Excellent (DevTools)</td></tr>
+      <tr><td>Async</td><td>Manual</td><td>Built-in (thunks)</td></tr>
+      <tr><td>Performance</td><td>Can degrade</td><td>Optimized</td></tr>
+      <tr><td>Boilerplate</td><td>Minimal</td><td>More setup</td></tr>
+    </tbody></table>
+  </div>
+</section>
+
+<!-- ╔══════════════════════════════════════╗ -->
+<!-- ║  UNIT 7 — FRONTEND LIBRARIES         ║ -->
+<!-- ╚══════════════════════════════════════╝ -->
+<section id="libraries">
+  <div class="section-number">Unit 07</div>
+  <h2>Frontend <span class="hl">Libraries</span></h2>
+
+  <div class="reveal">
+    <p style="color:var(--muted);max-width:600px;margin-bottom:2.5rem;">Libraries are pre-written code that solve common problems — so you don't reinvent the wheel. Think of them as power tools vs. chisels.</p>
+  </div>
+
+  <div class="reveal three-col" style="margin-bottom:3rem;">
+    <div class="card" style="border-top:3px solid #61DAFB;">
+      <div style="font-size:2rem;margin-bottom:0.5rem;">⚛️</div>
+      <h3 style="color:#61DAFB;">React</h3>
+      <p style="color:var(--muted);font-size:0.85rem;">Component-based UI, Virtual DOM, one-way data flow. You already know the basics!</p>
+    </div>
+    <div class="card" style="border-top:3px solid #764ABC;">
+      <div style="font-size:2rem;margin-bottom:0.5rem;">🗂️</div>
+      <h3 style="color:#764ABC;">Redux</h3>
+      <p style="color:var(--muted);font-size:0.85rem;">Global state management (covered in Unit 6).</p>
+    </div>
+    <div class="card" style="border-top:3px solid #0769AD;">
+      <div style="font-size:2rem;margin-bottom:0.5rem;">💲</div>
+      <h3 style="color:#0769AD;">jQuery</h3>
+      <p style="color:var(--muted);font-size:0.85rem;">Simplified DOM manipulation. <code style="font-family:var(--font-mono);font-size:0.75rem;">$("#btn").click(...)</code></p>
+    </div>
+    <div class="card" style="border-top:3px solid #7952B3;">
+      <div style="font-size:2rem;margin-bottom:0.5rem;">🎨</div>
+      <h3 style="color:#7952B3;">Bootstrap</h3>
+      <p style="color:var(--muted);font-size:0.85rem;">Ready-made CSS. Classes like <code style="font-family:var(--font-mono);font-size:0.75rem;">btn btn-primary</code>, grid system.</p>
+    </div>
+    <div class="card" style="border-top:3px solid var(--accent2);">
+      <div style="font-size:2rem;margin-bottom:0.5rem;">🌐</div>
+      <h3 style="color:var(--accent2);">Axios / Fetch</h3>
+      <p style="color:var(--muted);font-size:0.85rem;">Making API calls to backend servers.</p>
+    </div>
+  </div>
+
+  <div class="reveal two-col">
+    <div>
+      <h3>React Essentials — useState</h3>
+      <div class="code-block" style="margin-top:1rem;">
+        <div class="code-header">
+          <div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div>
+          <span class="code-label">Component.jsx</span>
+        </div>
+        <div class="code-body"><pre><span class="cm">// STATE — remembers values between renders</span>
+<span class="kw">const</span> [count, setCount] = <span class="fn">useState</span>(<span class="num">0</span>)
+<span class="cm">//      ^state  ^setter      ^initial value</span>
+
+<span class="cm">// Updating state triggers a re-render</span>
+<span class="fn">setCount</span>(count + <span class="num">1</span>)
+
+<span class="cm">// EFFECT — run code on mount / when deps change</span>
+<span class="fn">useEffect</span>(() =&gt; {
+  <span class="fn">fetch</span>(<span class="str">"https://api.example.com/users"</span>)
+    .<span class="fn">then</span>(res =&gt; res.<span class="fn">json</span>())
+    .<span class="fn">then</span>(data =&gt; <span class="fn">setUsers</span>(data))
+}, []) <span class="cm">// [] = run once on mount</span></pre></div>
+      </div>
+    </div>
+    <div>
+      <h3>Virtual DOM — How React is Fast</h3>
+      <div style="display:flex;flex-direction:column;gap:0.75rem;margin-top:1rem;">
+        <div class="card" style="display:flex;align-items:center;gap:1rem;">
+          <span style="font-size:1.5rem;">1️⃣</span>
+          <div>
+            <div style="font-weight:500;font-size:0.9rem;">State changes</div>
+            <div style="color:var(--muted);font-size:0.8rem;">setCount(count + 1) called</div>
+          </div>
+        </div>
+        <div class="card" style="display:flex;align-items:center;gap:1rem;">
+          <span style="font-size:1.5rem;">2️⃣</span>
+          <div>
+            <div style="font-weight:500;font-size:0.9rem;">Virtual DOM diff</div>
+            <div style="color:var(--muted);font-size:0.8rem;">React compares old vs new virtual tree</div>
+          </div>
+        </div>
+        <div class="card" style="display:flex;align-items:center;gap:1rem;">
+          <span style="font-size:1.5rem;">3️⃣</span>
+          <div>
+            <div style="font-weight:500;font-size:0.9rem;">Minimal update</div>
+            <div style="color:var(--muted);font-size:0.8rem;">Only changed parts update in real DOM</div>
+          </div>
+        </div>
+      </div>
+      <div class="callout" style="margin-top:1rem;">
+        <strong>One-way data flow:</strong> Data flows <em>down</em> (parent → child via props). Events go <em>up</em> (child calls parent's callback).
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ╔══════════════════════════════════════╗ -->
+<!-- ║  UNIT 8 — NPM                        ║ -->
+<!-- ╚══════════════════════════════════════╝ -->
+<section id="npm">
+  <div class="section-number">Unit 08</div>
+  <h2><span class="hl">npm</span> — Node<br>Package Manager</h2>
+
+  <div class="reveal two-col">
+    <div>
+      <p style="color:var(--muted);margin-bottom:2rem;">npm is like the <strong>App Store for JavaScript code</strong>. Instead of writing a server from scratch, you just install Express. Instead of writing date logic, you install moment. Your project's "shopping list" of these packages is <code style="font-family:var(--font-mono);color:var(--accent);">package.json</code>.</p>
+
+      <h3>3 Key Files</h3>
+      <div style="display:flex;flex-direction:column;gap:0.75rem;margin-top:1rem;">
+        <div class="card card-accent">
+          <code style="font-family:var(--font-mono);color:var(--accent);font-size:0.85rem;">package.json</code>
+          <p style="color:var(--muted);font-size:0.82rem;margin-top:0.3rem;">The heart. Stores name, version, scripts, dependencies. Commit this.</p>
+        </div>
+        <div class="card card-green">
+          <code style="font-family:var(--font-mono);color:var(--accent2);font-size:0.85rem;">package-lock.json</code>
+          <p style="color:var(--muted);font-size:0.82rem;margin-top:0.3rem;">Locks exact versions so everyone on your team gets the same code. Commit this too.</p>
+        </div>
+        <div class="card card-red">
+          <code style="font-family:var(--font-mono);color:var(--accent3);font-size:0.85rem;">node_modules/</code>
+          <p style="color:var(--muted);font-size:0.82rem;margin-top:0.3rem;">Where packages actually live. <strong style="color:var(--accent3);">NEVER push to GitHub!</strong> Add to .gitignore.</p>
+        </div>
+      </div>
+
+      <h3 style="margin-top:2rem;">dependencies vs devDependencies</h3>
+      <table class="compare-table" style="margin-top:1rem;">
+        <tbody><tr><th>Type</th><th>When needed</th><th>Example</th></tr>
+        <tr><td><code style="color:var(--accent2);">dependencies</code></td><td>In production</td><td>express, mongoose</td></tr>
+        <tr><td><code style="color:var(--muted);">devDependencies</code></td><td>Dev only</td><td>nodemon, eslint</td></tr>
+      </tbody></table>
+
+      <h3 style="margin-top:2rem;">Version Symbols <span class="badge badge-exam">⚡ yeh padhlo, kaam ayega</span></h3>
+      <div style="display:flex;gap:0.75rem;margin-top:0.75rem;flex-wrap:wrap;">
+        <div class="card" style="flex:1;min-width:120px;">
+          <code style="font-family:var(--font-mono);color:var(--accent);">^4.18.2</code>
+          <p style="color:var(--muted);font-size:0.75rem;margin-top:0.3rem;">Allow minor updates (4.x.x)</p>
+        </div>
+        <div class="card" style="flex:1;min-width:120px;">
+          <code style="font-family:var(--font-mono);color:var(--accent4);">~4.18.2</code>
+          <p style="color:var(--muted);font-size:0.75rem;margin-top:0.3rem;">Allow patch updates only (4.18.x)</p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <h3>Key Commands — Terminal Demo</h3>
+      <div class="terminal" style="margin-top:1rem;" id="npmTerminal">
+        <div class="terminal-header">
+          <div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div>
+          <span style="font-size:0.7rem;color:var(--muted);margin-left:0.5rem;">bash</span>
+        </div>
+        <div class="terminal-body" id="npmTerminalBody">
+          <!-- filled by JS -->
+        </div>
+      </div>
+
+      <div class="code-block" style="margin-top:1.5rem;">
+        <div class="code-header">
+          <div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div>
+          <span class="code-label">package.json</span>
+        </div>
+        <div class="code-body"><pre>{
+  <span class="prop">"name"</span>: <span class="str">"my-app"</span>,
+  <span class="prop">"version"</span>: <span class="str">"1.0.0"</span>,
+  <span class="prop">"scripts"</span>: {
+    <span class="prop">"start"</span>: <span class="str">"node server.js"</span>,
+    <span class="prop">"dev"</span>: <span class="str">"nodemon server.js"</span>
+  },
+  <span class="prop">"dependencies"</span>: {
+    <span class="prop">"express"</span>: <span class="str">"^4.18.2"</span>,
+    <span class="prop">"mongoose"</span>: <span class="str">"^7.4.1"</span>
+  },
+  <span class="prop">"devDependencies"</span>: {
+    <span class="prop">"nodemon"</span>: <span class="str">"^3.0.1"</span>
+  }
+}</pre></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ╔══════════════════════════════════════╗ -->
+<!-- ║  UNIT 9 — NODE & EXPRESS             ║ -->
+<!-- ╚══════════════════════════════════════╝ -->
+<section id="node">
+  <div class="section-number">Unit 09</div>
+  <h2>Node.js &amp;<br><span class="hl">Express.js</span></h2>
+
+  <div class="reveal two-col" style="margin-bottom:3rem;">
+    <div>
+      <div class="section-line"></div>
+      <h3>Node.js — JS outside the browser</h3>
+      <p style="color:var(--muted);margin-bottom:1.5rem;">You know JS runs in Chrome. Node.js lets you run JS on a <em>server</em> (or your computer). It's built on Chrome's V8 engine but has no DOM — instead, it has access to files, databases, and networks.</p>
+      <div class="callout">
+        <strong>Key trait:</strong> Node is <em>asynchronous</em> and <em>non-blocking</em>. It can handle thousands of requests without freezing, because it doesn't wait around for slow operations.
+      </div>
+      <h3 style="margin-top:2rem;">Express.js — the thin wrapper</h3>
+      <p style="color:var(--muted);">Node's built-in server is verbose. Express wraps it in clean, readable syntax — routing, middleware, and response helpers in a few lines.</p>
+    </div>
+    <div>
+      <h3>HTTP Methods</h3>
+      <table class="compare-table" style="margin-top:1rem;">
+        <tbody><tr><th>Method</th><th>Purpose</th><th>Like...</th></tr>
+        <tr><td><code style="color:var(--accent2);">GET</code></td><td>Fetch data</td><td>Reading</td></tr>
+        <tr><td><code style="color:var(--accent4);">POST</code></td><td>Send/create data</td><td>Writing</td></tr>
+        <tr><td><code style="color:#FFB366;">PUT</code></td><td>Update data</td><td>Replacing</td></tr>
+        <tr><td><code style="color:var(--accent3);">DELETE</code></td><td>Remove data</td><td>Deleting</td></tr>
+      </tbody></table>
+    </div>
+  </div>
+
+  <div class="reveal two-col">
+    <div>
+      <h3>A Working Express Server</h3>
+      <div class="code-block" style="margin-top:1rem;">
+        <div class="code-header">
+          <div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div>
+          <span class="code-label">server.js</span>
+        </div>
+        <div class="code-body"><pre><span class="kw">const</span> express = <span class="fn">require</span>(<span class="str">"express"</span>)
+<span class="kw">const</span> app = <span class="fn">express</span>()
+
+<span class="cm">// Middleware — parses incoming JSON body</span>
+app.<span class="fn">use</span>(express.<span class="fn">json</span>())
+
+<span class="cm">// Routes</span>
+app.<span class="fn">get</span>(<span class="str">"/"</span>, (req, res) =&gt; {
+  res.<span class="fn">send</span>(<span class="str">"Hello World!"</span>)
+})
+
+app.<span class="fn">post</span>(<span class="str">"/login"</span>, (req, res) =&gt; {
+  <span class="kw">const</span> { email } = req.body <span class="cm">// from JSON body</span>
+  res.<span class="fn">json</span>({ message: <span class="str">`Welcome, ${email}`</span> })
+})
+
+<span class="cm">// URL param → /user/42 → req.params.id = "42"</span>
+app.<span class="fn">get</span>(<span class="str">"/user/:id"</span>, (req, res) =&gt; {
+  res.<span class="fn">send</span>(req.params.id)
+})
+
+app.<span class="fn">listen</span>(<span class="num">3000</span>, () =&gt;
+  console.<span class="fn">log</span>(<span class="str">"Server running on port 3000"</span>)
+)</pre></div>
+      </div>
+    </div>
+
+    <div>
+      <h3>Middleware Pipeline <span class="badge badge-exam">⚡ yeh padhlo, kaam ayega</span></h3>
+      <p style="color:var(--muted);font-size:0.85rem;margin:0.75rem 0 1.5rem;">Middleware functions run <em>between</em> the request arriving and the response being sent. They MUST call <code style="font-family:var(--font-mono);color:var(--accent3);">next()</code> or the request hangs forever.</p>
+
+      <div class="pipeline" id="pipeline">
+        <div class="pipe-node" data-step="0">
+          <span class="pipe-icon">📥</span>
+          <div class="pipe-info">
+            <div class="pipe-title">Request arrives</div>
+            <div class="pipe-desc">POST /api/students</div>
+          </div>
+        </div>
+        <div class="pipe-node" data-step="1">
+          <span class="pipe-icon">🔍</span>
+          <div class="pipe-info">
+            <div class="pipe-title">Logger Middleware</div>
+            <div class="pipe-desc">console.log(req.method)</div>
+          </div>
+          <span class="pipe-badge must">calls next()</span>
+        </div>
+        <div class="pipe-node" data-step="2">
+          <span class="pipe-icon">🔐</span>
+          <div class="pipe-info">
+            <div class="pipe-title">Auth Middleware</div>
+            <div class="pipe-desc">verify JWT token</div>
+          </div>
+          <span class="pipe-badge must">calls next()</span>
+        </div>
+        <div class="pipe-node" data-step="3">
+          <span class="pipe-icon">📦</span>
+          <div class="pipe-info">
+            <div class="pipe-title">express.json()</div>
+            <div class="pipe-desc">parse req.body</div>
+          </div>
+          <span class="pipe-badge must">calls next()</span>
+        </div>
+        <div class="pipe-node" data-step="4">
+          <span class="pipe-icon">⚡</span>
+          <div class="pipe-info">
+            <div class="pipe-title">Route Handler</div>
+            <div class="pipe-desc">controller logic runs</div>
+          </div>
+          <span class="pipe-badge" style="border-color:var(--accent2);color:var(--accent2);">res.json()</span>
+        </div>
+      </div>
+
+      <div class="code-block" style="margin-top:1.5rem;">
+        <div class="code-header">
+          <div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div>
+          <span class="code-label">Custom Middleware</span>
+        </div>
+        <div class="code-body"><pre>app.<span class="fn">use</span>((req, res, <span class="prop">next</span>) =&gt; {
+  console.<span class="fn">log</span>(<span class="str">`${req.method} ${req.url}`</span>)
+  <span class="fn">next</span>() <span class="cm">// ← MUST call this!</span>
+})</pre></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ╔══════════════════════════════════════╗ -->
+<!-- ║  UNIT 10 — MONGODB & MONGOOSE        ║ -->
+<!-- ╚══════════════════════════════════════╝ -->
+<section id="mongo">
+  <div class="section-number">Unit 10</div>
+  <h2>MongoDB &amp;<br><span class="hl">Mongoose</span></h2>
+
+  <div class="reveal two-col" style="margin-bottom:3rem;">
+    <div>
+      <div class="section-line"></div>
+      <h3>MongoDB — NoSQL Database</h3>
+      <p style="color:var(--muted);margin-bottom:1.5rem;">Traditional SQL databases store data in rigid tables with fixed columns. MongoDB stores data as <strong>JSON-like documents</strong> — flexible, nested, and schema-free by default.</p>
+      <table class="compare-table" style="margin-bottom:1.5rem;">
+        <tbody><tr><th>SQL</th><th>MongoDB</th></tr>
+        <tr><td>Table</td><td>Collection</td></tr>
+        <tr><td>Row</td><td>Document</td></tr>
+        <tr><td>Column</td><td>Field</td></tr>
+        <tr><td>Fixed schema</td><td>Flexible schema</td></tr>
+        <tr><td>JOINs</td><td>Embedded docs</td></tr>
+      </tbody></table>
+      <div class="callout">
+        <strong>Mongoose</strong> adds a schema and validation layer on top of MongoDB. Without Mongoose, there's nothing stopping someone from saving garbage data in your database.
+      </div>
+    </div>
+    <div>
+      <h3>Live Document Preview</h3>
+      <p style="color:var(--muted);font-size:0.85rem;margin-bottom:1rem;">This is what a student document looks like in MongoDB:</p>
+      <div class="mongo-doc" id="mongoDoc">
+        <div class="doc-field" id="df1"><span class="doc-key">_id:</span><span class="doc-val-id">ObjectId("64abc...")</span></div>
+        <div class="doc-field" id="df2"><span class="doc-key">name:</span><span class="doc-val-str">"Alice Johnson"</span></div>
+        <div class="doc-field" id="df3"><span class="doc-key">age:</span><span class="doc-val-num">21</span></div>
+        <div class="doc-field" id="df4"><span class="doc-key">isActive:</span><span class="doc-val-bool">true</span></div>
+        <div class="doc-field" id="df5"><span class="doc-key">courses:</span><span style="color:var(--text);">["Math", "CS", "Physics"]</span></div>
+        <div class="doc-field" id="df6"><span class="doc-key">__v:</span><span class="doc-val-num">0</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="reveal two-col">
+    <div>
+      <h3>Schema + CRUD</h3>
+      <div class="code-block" style="margin-top:1rem;">
+        <div class="code-header">
+          <div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div>
+          <span class="code-label">Student.js</span>
+        </div>
+        <div class="code-body"><pre><span class="cm">// 1. Connect</span>
+mongoose.<span class="fn">connect</span>(<span class="str">"mongodb://127.0.0.1/school"</span>)
+
+<span class="cm">// 2. Schema — defines shape + validation</span>
+<span class="kw">const</span> studentSchema = <span class="kw">new</span> mongoose.<span class="fn">Schema</span>({
+  <span class="prop">name</span>:     { <span class="prop">type</span>: String,  <span class="prop">required</span>: <span class="num">true</span> },
+  <span class="prop">age</span>:      { <span class="prop">type</span>: Number,  <span class="prop">min</span>: <span class="num">18</span> },
+  <span class="prop">isActive</span>: { <span class="prop">type</span>: Boolean, <span class="prop">default</span>: <span class="num">true</span> }
+})
+
+<span class="cm">// 3. Model — our interface to the collection</span>
+<span class="kw">const</span> Student = mongoose.<span class="fn">model</span>(<span class="str">"Student"</span>, studentSchema)</pre></div>
+      </div>
+    </div>
+    <div>
+      <h3>CRUD Operations</h3>
+      <div class="code-block" style="margin-top:1rem;">
+        <div class="code-header">
+          <div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div>
+          <span class="code-label">controller.js</span>
+        </div>
+        <div class="code-body"><pre><span class="cm">// CREATE</span>
+<span class="kw">await</span> Student.<span class="fn">create</span>(req.body)
+
+<span class="cm">// READ all</span>
+<span class="kw">await</span> Student.<span class="fn">find</span>()
+
+<span class="cm">// READ one by ID</span>
+<span class="kw">await</span> Student.<span class="fn">findById</span>(id)
+
+<span class="cm">// UPDATE — { new: true } returns updated doc</span>
+<span class="kw">await</span> Student.<span class="fn">findByIdAndUpdate</span>(
+  id, data, { <span class="prop">new</span>: <span class="num">true</span> }
+)
+
+<span class="cm">// DELETE</span>
+<span class="kw">await</span> Student.<span class="fn">findByIdAndDelete</span>(id)</pre></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ╔══════════════════════════════════════╗ -->
+<!-- ║  UNIT 11 — PROJECT                   ║ -->
+<!-- ╚══════════════════════════════════════╝ -->
+<section id="project">
+  <div class="section-number">Unit 11</div>
+  <h2>Student Management<br><span class="hl">REST API</span> — Project</h2>
+
+  <div class="reveal two-col" style="margin-bottom:3rem;">
+    <div>
+      <div class="section-line"></div>
+      <h3>The Folder Structure</h3>
+      <p style="color:var(--muted);margin-bottom:1.5rem;">This is the <strong>industry standard</strong> MVC pattern. Every professional Node.js project uses something close to this:</p>
+      <div class="card" style="padding:1.5rem 2rem;" id="folderTree">
+        <div class="tree">
+          <div class="tree-item" id="ti0"><span class="tree-icon">📁</span><span class="tree-folder">backend/</span></div>
+          <div class="tree-item" id="ti1" style="padding-left:1.5rem;"><span class="tree-icon">├</span><span class="tree-folder">models/</span><span class="tree-desc">Mongoose schemas</span></div>
+          <div class="tree-item" id="ti2" style="padding-left:3rem;"><span class="tree-icon">└</span><span class="tree-file">Student.js</span></div>
+          <div class="tree-item" id="ti3" style="padding-left:1.5rem;"><span class="tree-icon">├</span><span class="tree-folder">routes/</span><span class="tree-desc">URL paths</span></div>
+          <div class="tree-item" id="ti4" style="padding-left:3rem;"><span class="tree-icon">└</span><span class="tree-file">studentRoutes.js</span></div>
+          <div class="tree-item" id="ti5" style="padding-left:1.5rem;"><span class="tree-icon">├</span><span class="tree-folder">controllers/</span><span class="tree-desc">Business logic</span></div>
+          <div class="tree-item" id="ti6" style="padding-left:3rem;"><span class="tree-icon">└</span><span class="tree-file">studentController.js</span></div>
+          <div class="tree-item" id="ti7" style="padding-left:1.5rem;"><span class="tree-icon">├</span><span class="tree-folder">config/</span><span class="tree-desc">DB connection</span></div>
+          <div class="tree-item" id="ti8" style="padding-left:3rem;"><span class="tree-icon">└</span><span class="tree-file">db.js</span></div>
+          <div class="tree-item" id="ti9" style="padding-left:1.5rem;"><span class="tree-icon">└</span><span class="tree-file" style="color:var(--accent);">server.js</span><span class="tree-desc">Entry point</span></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <h3>The Request Flow</h3>
+      <div style="display:flex;flex-direction:column;gap:0;margin-top:1rem;">
+        <div class="card" style="display:flex;gap:1rem;border-radius:6px 6px 0 0;border-bottom:none;">
+          <span style="font-size:1.5rem;">1️⃣</span>
+          <div>
+            <div style="font-weight:600;font-size:0.9rem;font-family:var(--font-mono);color:var(--accent);">server.js</div>
+            <div style="color:var(--muted);font-size:0.8rem;">Connects DB, sets up middleware, loads routes</div>
+          </div>
+        </div>
+        <div class="card" style="display:flex;gap:1rem;border-radius:0;border-top:none;border-bottom:none;">
+          <span style="font-size:1.5rem;">2️⃣</span>
+          <div>
+            <div style="font-weight:600;font-size:0.9rem;font-family:var(--font-mono);color:var(--accent4);">routes/studentRoutes.js</div>
+            <div style="color:var(--muted);font-size:0.8rem;">Maps URL + method to controller function</div>
+          </div>
+        </div>
+        <div class="card" style="display:flex;gap:1rem;border-radius:0;border-top:none;border-bottom:none;">
+          <span style="font-size:1.5rem;">3️⃣</span>
+          <div>
+            <div style="font-weight:600;font-size:0.9rem;font-family:var(--font-mono);color:var(--accent2);">controllers/studentController.js</div>
+            <div style="color:var(--muted);font-size:0.8rem;">Business logic — calls model methods</div>
+          </div>
+        </div>
+        <div class="card" style="display:flex;gap:1rem;border-radius:0;border-top:none;border-bottom:none;">
+          <span style="font-size:1.5rem;">4️⃣</span>
+          <div>
+            <div style="font-weight:600;font-size:0.9rem;font-family:var(--font-mono);color:#c792ea;">models/Student.js</div>
+            <div style="color:var(--muted);font-size:0.8rem;">Talks to MongoDB via Mongoose</div>
+          </div>
+        </div>
+        <div class="card" style="display:flex;gap:1rem;border-radius:0 0 6px 6px;border-top:none;">
+          <span style="font-size:1.5rem;">5️⃣</span>
+          <div>
+            <div style="font-weight:600;font-size:0.9rem;">Response sent</div>
+            <div style="color:var(--muted);font-size:0.8rem;">res.json(data) back to client</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="reveal">
+    <h3>REST API Endpoints</h3>
+    <div style="border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-top:1rem;">
+      <div class="rest-row" style="background:var(--surface);">
+        <div class="rest-method" style="color:var(--muted);">Method</div>
+        <div class="rest-path" style="color:var(--muted);">Path</div>
+        <div class="rest-desc" style="color:var(--muted);">Action</div>
+      </div>
+      <div class="rest-row"><div class="rest-method m-post">POST</div><div class="rest-path">/api/students</div><div class="rest-desc">Create a new student</div></div>
+      <div class="rest-row"><div class="rest-method m-get">GET</div><div class="rest-path">/api/students</div><div class="rest-desc">Fetch all students</div></div>
+      <div class="rest-row"><div class="rest-method m-get">GET</div><div class="rest-path">/api/students/:id</div><div class="rest-desc">Fetch one student by ID</div></div>
+      <div class="rest-row"><div class="rest-method m-put">PUT</div><div class="rest-path">/api/students/:id</div><div class="rest-desc">Update student data</div></div>
+      <div class="rest-row"><div class="rest-method m-delete">DELETE</div><div class="rest-path">/api/students/:id</div><div class="rest-desc">Remove a student</div></div>
+    </div>
+  </div>
+
+  <div class="reveal two-col" style="margin-top:2rem;">
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div>
+        <span class="code-label">studentRoutes.js</span>
+      </div>
+      <div class="code-body"><pre><span class="kw">const</span> router = express.<span class="fn">Router</span>()
+
+router.<span class="fn">post</span>(<span class="str">"/"</span>,      createStudent)
+router.<span class="fn">get</span>(<span class="str">"/"</span>,       getAllStudents)
+router.<span class="fn">get</span>(<span class="str">"/:id"</span>,    getStudentById)
+router.<span class="fn">put</span>(<span class="str">"/:id"</span>,    updateStudent)
+router.<span class="fn">delete</span>(<span class="str">"/:id"</span>, deleteStudent)
+
+<span class="kw">module</span>.exports = router</pre></div>
+    </div>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div>
+        <span class="code-label">studentController.js</span>
+      </div>
+      <div class="code-body"><pre><span class="kw">const</span> getAllStudents = <span class="kw">async</span> (req, res) =&gt; {
+  <span class="kw">try</span> {
+    <span class="kw">const</span> students = <span class="kw">await</span> Student.<span class="fn">find</span>()
+    res.<span class="fn">json</span>(students)
+  } <span class="kw">catch</span> (err) {
+    res.<span class="fn">status</span>(<span class="num">500</span>).<span class="fn">json</span>({ error: err.message })
+  }
+}</pre></div>
+    </div>
+  </div>
+</section>
+
+<!-- ╔══════════════════════════════════════╗ -->
+<!-- ║  CHEATSHEET                          ║ -->
+<!-- ╚══════════════════════════════════════╝ -->
+<section id="cheatsheet">
+  <div class="section-number">Quick Reference</div>
+  <h2>Last-Minute<br><span class="hl">Cheatsheet</span></h2>
+
+  <div class="reveal cheat-grid">
+    <div class="cheat-item"><div class="cheat-concept">Redux Store</div><div class="cheat-def">Single source of truth for all app state</div></div>
+    <div class="cheat-item"><div class="cheat-concept">Reducer</div><div class="cheat-def">Pure function — never mutates state directly</div></div>
+    <div class="cheat-item"><div class="cheat-concept">useSelector</div><div class="cheat-def">Read data from the Redux store</div></div>
+    <div class="cheat-item"><div class="cheat-concept">useDispatch</div><div class="cheat-def">Trigger an action → updates the store</div></div>
+    <div class="cheat-item"><div class="cheat-concept">npm init -y</div><div class="cheat-def">Creates package.json instantly</div></div>
+    <div class="cheat-item"><div class="cheat-concept">--save-dev</div><div class="cheat-def">Install as devDependency (dev only)</div></div>
+    <div class="cheat-item"><div class="cheat-concept">Middleware</div><div class="cheat-def">Runs between request &amp; response. Must call next()</div></div>
+    <div class="cheat-item"><div class="cheat-concept">Mongoose</div><div class="cheat-def">Adds schema + validation on top of MongoDB</div></div>
+    <div class="cheat-item"><div class="cheat-concept">REST API</div><div class="cheat-def">CRUD via HTTP methods on structured routes</div></div>
+    <div class="cheat-item"><div class="cheat-concept">node_modules/</div><div class="cheat-def">Never push to GitHub — add to .gitignore</div></div>
+    <div class="cheat-item"><div class="cheat-concept">express.json()</div><div class="cheat-def">Middleware to parse JSON request bodies</div></div>
+    <div class="cheat-item"><div class="cheat-concept">{ new: true }</div><div class="cheat-def">Makes findByIdAndUpdate return updated doc</div></div>
+    <div class="cheat-item"><div class="cheat-concept">^4.x vs ~4.18.x</div><div class="cheat-def">^ allows minor updates, ~ allows patch only</div></div>
+    <div class="cheat-item"><div class="cheat-concept">Virtual DOM</div><div class="cheat-def">React's diff algo — only updates what changed</div></div>
+    <div class="cheat-item"><div class="cheat-concept">useEffect(fn,[])</div><div class="cheat-def">Runs once on mount — perfect for API calls</div></div>
+    <div class="cheat-item"><div class="cheat-concept">req.params.id</div><div class="cheat-def">URL param from routes like /user/:id</div></div>
+  </div>
+
+  <div class="reveal" style="margin-top:4rem;text-align:center;padding:3rem;border:1px solid var(--border);border-radius:6px;background:var(--surface);">
+    <div style="font-size:3rem;margin-bottom:1rem;">🎓</div>
+    <div style="font-family:var(--font-head);font-size:1.8rem;font-weight:800;">You've got this.</div>
+    <p style="color:var(--muted);margin-top:0.75rem;max-width:400px;margin-left:auto;margin-right:auto;">Redux → npm → Node → Express → MongoDB → REST. It all connects. Go build something.</p>
+  </div>
+</section>
+
+<script>
+// ── PROGRESS BAR ──────────────────────────
+window.addEventListener('scroll', () => {
+  const scrolled = window.scrollY;
+  const maxScroll = document.body.scrollHeight - window.innerHeight;
+  document.getElementById('progress').style.width = (scrolled / maxScroll * 100) + '%';
+});
+
+// ── SCROLL REVEAL ──────────────────────────
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      revealObserver.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+// ── REDUX COUNTER DEMO ─────────────────────
+let reduxState = { counter: 0 };
+const log = document.getElementById('counterLog');
+
+function logDispatch(action) {
+  const entry = document.createElement('div');
+  entry.className = 'log-entry';
+  entry.innerHTML = `<span style="color:var(--accent3)">dispatch</span>(<span style="color:var(--accent)">${action}</span>) → state: <span style="color:var(--accent4)">${reduxState.counter}</span>`;
+  log.prepend(entry);
+  if (log.children.length > 5) log.removeChild(log.lastChild);
+}
+
+function bump() {
+  const el = document.getElementById('counterDisplay');
+  el.classList.add('bump');
+  setTimeout(() => el.classList.remove('bump'), 120);
+}
+
+function reduxIncrement() {
+  reduxState.counter++;
+  document.getElementById('counterDisplay').textContent = reduxState.counter;
+  bump();
+  logDispatch('increment()');
+}
+function reduxDecrement() {
+  reduxState.counter--;
+  document.getElementById('counterDisplay').textContent = reduxState.counter;
+  bump();
+  logDispatch('decrement()');
+}
+function reduxReset() {
+  reduxState.counter = 0;
+  document.getElementById('counterDisplay').textContent = 0;
+  bump();
+  logDispatch('reset()');
+}
+
+// ── NPM TERMINAL ANIMATION ─────────────────
+const npmLines = [
+  { type: 'cmd', text: 'npm init -y' },
+  { type: 'out success', text: 'Wrote to /project/package.json' },
+  { type: 'cmd', text: 'npm install express' },
+  { type: 'out info', text: 'added 57 packages in 2s' },
+  { type: 'cmd', text: 'npm install nodemon --save-dev' },
+  { type: 'out info', text: 'added 29 packages (dev)' },
+  { type: 'cmd', text: 'npm run dev' },
+  { type: 'out success', text: 'Server running on port 3000' },
+  { type: 'cursor', text: '' },
+];
+
+const termBody = document.getElementById('npmTerminalBody');
+let lineIndex = 0;
+
+function typeNextLine() {
+  if (lineIndex >= npmLines.length) return;
+  const line = npmLines[lineIndex];
+  lineIndex++;
+
+  if (line.type === 'cursor') {
+    const div = document.createElement('div');
+    div.className = 't-line';
+    div.innerHTML = `<span class="t-prompt">$</span><span class="cursor"></span>`;
+    termBody.appendChild(div);
+    return;
+  }
+
+  const div = document.createElement('div');
+  if (line.type === 'cmd') {
+    div.className = 't-line';
+    div.innerHTML = `<span class="t-prompt">$</span><span class="t-cmd">${line.text}</span>`;
+    termBody.appendChild(div);
+    setTimeout(typeNextLine, 600);
+  } else {
+    div.className = 't-output t-' + line.type.split(' ')[1];
+    div.textContent = '  ' + line.text;
+    termBody.appendChild(div);
+    setTimeout(typeNextLine, 400);
+  }
+}
+
+// Start terminal when visible
+const termObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      setTimeout(typeNextLine, 500);
+      termObserver.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.5 });
+const termEl = document.getElementById('npmTerminal');
+if (termEl) termObserver.observe(termEl);
+
+// ── MIDDLEWARE PIPELINE ANIMATION ────────
+const pipeNodes = document.querySelectorAll('.pipe-node');
+let pipeStep = 0;
+
+function animatePipeline() {
+  pipeNodes.forEach(n => n.classList.remove('active'));
+  if (pipeStep < pipeNodes.length) {
+    pipeNodes[pipeStep].classList.add('active');
+    pipeStep++;
+    setTimeout(animatePipeline, 700);
+  } else {
+    pipeStep = 0;
+    setTimeout(animatePipeline, 1200);
+  }
+}
+
+const pipeObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      animatePipeline();
+      pipeObserver.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.4 });
+const pipeEl = document.getElementById('pipeline');
+if (pipeEl) pipeObserver.observe(pipeEl);
+
+// ── MONGO DOC ANIMATION ────────────────────
+const docFields = document.querySelectorAll('.doc-field');
+const docObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      docFields.forEach((f, i) => {
+        setTimeout(() => f.classList.add('show'), i * 200);
+      });
+      docObserver.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.3 });
+const mongoDoc = document.getElementById('mongoDoc');
+if (mongoDoc) docObserver.observe(mongoDoc);
+
+// ── FOLDER TREE ANIMATION ──────────────────
+const treeItems = document.querySelectorAll('.tree-item');
+const treeObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      treeItems.forEach((item, i) => {
+        setTimeout(() => item.classList.add('show'), i * 120);
+      });
+      treeObserver.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.2 });
+const treeEl = document.getElementById('folderTree');
+if (treeEl) treeObserver.observe(treeEl);
+
+// ── ACTIVE NAV LINKS ──────────────────────
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.nav-links a');
+
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(sec => {
+    if (window.scrollY >= sec.offsetTop - 100) current = sec.getAttribute('id');
+  });
+  navLinks.forEach(a => {
+    a.style.color = a.getAttribute('href') === '#' + current ? 'var(--accent)' : '';
+  });
+});
+</script>
+
+
+</body></html>
