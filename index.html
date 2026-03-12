@@ -1,9 +1,11 @@
-<html lang="en"><head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Full-Stack Fundamentals — Units 6–11</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&amp;family=Space+Mono:wght@400;700&amp;family=DM+Sans:wght@300;400;500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #080808;
@@ -517,23 +519,52 @@
     transition: width 0.1s;
   }
 
-  /* ─── TOOLTIP ──────────────────────── */
-  .tooltip {
-    position: relative; cursor: help;
-    border-bottom: 1px dashed var(--muted);
+  /* ─── KEYWORD TOOLTIPS ─────────────────── */
+  .kw-tip {
+    cursor: help;
+    border-bottom: 1px dashed rgba(255,229,102,0.45);
+    color: inherit;
+    transition: color 0.15s, border-color 0.15s;
   }
-  .tooltip::after {
-    content: attr(data-tip);
-    position: absolute; bottom: 120%; left: 50%;
-    transform: translateX(-50%);
-    background: var(--surface2); border: 1px solid var(--border);
-    padding: 0.4rem 0.75rem; border-radius: 4px;
-    font-family: var(--font-mono); font-size: 0.7rem;
-    color: var(--text); white-space: nowrap;
-    opacity: 0; pointer-events: none;
-    transition: opacity 0.2s;
+  .kw-tip:hover {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
   }
-  .tooltip:hover::after { opacity: 1; }
+  /* floating tooltip box — positioned by JS */
+  #kwTooltip {
+    position: fixed;
+    z-index: 9999;
+    max-width: 260px;
+    background: #1c1c1c;
+    border: 1px solid rgba(255,229,102,0.28);
+    border-radius: 7px;
+    padding: 0.6rem 0.9rem 0.7rem;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.16s ease, transform 0.16s ease;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.7);
+  }
+  #kwTooltip.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  #kwTooltip .tt-word {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--accent);
+    margin-bottom: 0.3rem;
+    letter-spacing: 0.06em;
+  }
+  #kwTooltip .tt-def {
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    color: #c8c8c8;
+    line-height: 1.55;
+  }
+  /* old tooltip kept for compat */
+  .tooltip { position: relative; cursor: help; border-bottom: 1px dashed var(--muted); }
+  .tooltip::after { display: none; }
 
   /* ─── BADGES ──────────────────────── */
   .badge {
@@ -594,14 +625,17 @@
 </head>
 <body>
 
+<!-- Floating keyword tooltip -->
+<div id="kwTooltip"><div class="tt-word" id="ttWord"></div><div class="tt-def" id="ttDef"></div></div>
+
 <!-- Progress Bar -->
-<div class="progress-bar" id="progress" style="width: 10.0283%;"></div>
+<div class="progress-bar" id="progress"></div>
 
 <!-- NAV -->
 <nav>
   <div class="nav-logo">FS / 6–11</div>
   <ul class="nav-links">
-    <li><a href="#redux" style="color: var(--accent);">U6 Redux</a></li>
+    <li><a href="#redux">U6 Redux</a></li>
     <li><a href="#libraries">U7 Libraries</a></li>
     <li><a href="#npm">U8 npm</a></li>
     <li><a href="#node">U9 Node/Express</a></li>
@@ -635,27 +669,27 @@
   <div class="section-number">Unit 06</div>
   <h2>Re<span class="hl">dux</span><br>Global State <span class="hl">Management</span></h2>
 
-  <div class="reveal two-col visible">
+  <div class="reveal two-col">
     <div>
       <div class="section-line"></div>
-      <h3>The Problem: Props Drilling 🕳️</h3>
-      <p style="color:var(--muted); margin-bottom:1rem;">Imagine passing data from a <strong>grandparent</strong> component all the way down to a <strong>grandchild</strong> — through every middle component that doesn't even need it. That's props drilling, and it's a nightmare in large apps.</p>
+      <h3>The Problem: <span class="kw-tip" data-word="Props Drilling" data-def="Passing data through many middle components just to reach a deeply nested child — even if those middle components don't need the data at all.">Props Drilling</span> 🕳️</h3>
+      <p style="color:var(--muted); margin-bottom:1rem;">Imagine passing data from a <strong>grandparent</strong> <span class="kw-tip" data-word="component" data-def="A reusable, self-contained piece of UI — like a button, navbar, or card. Think of it like a custom HTML tag you define yourself.">component</span> all the way down to a <strong>grandchild</strong> — through every middle component that doesn't even need it. That's <span class="kw-tip" data-word="props drilling" data-def="The annoying pattern of passing props down multiple levels of components just to get data to one deeply nested child.">props drilling</span>, and it's a nightmare in large apps.</p>
       <div class="callout">
-        <strong>The Bank Analogy:</strong> You don't walk into a bank vault yourself. You submit a <em>request</em> (Action), a teller processes it (Reducer), and the balance updates in the system (Store). Same idea.
+        <strong>The Bank Analogy:</strong> You don't walk into a bank vault yourself. You submit a <em>request</em> (<span class="kw-tip" data-word="Action" data-def="A plain JS object describing what you want to do. Always has a 'type' field, e.g. { type: 'INCREMENT' }">Action</span>), a teller processes it (<span class="kw-tip" data-word="Reducer" data-def="A pure function that takes the current state + an action, and returns the NEW state. It never changes the old state directly.">Reducer</span>), and the balance updates in the system (<span class="kw-tip" data-word="Store" data-def="The single place where ALL your app's shared state lives. Think of it as the app's memory bank.">Store</span>). Same idea.
       </div>
       <h3 style="margin-top:2rem;">4 Core Concepts</h3>
       <div style="display:flex; flex-direction:column; gap:0.75rem; margin-top:1rem;">
         <div class="card card-accent">
           <strong style="font-family:var(--font-mono);color:var(--accent);">Store</strong>
-          <p style="color:var(--muted);font-size:0.85rem;margin-top:0.3rem;">The single vault. All your app's state lives here. One source of truth.</p>
+          <p style="color:var(--muted);font-size:0.85rem;margin-top:0.3rem;">The single vault. All your app's <span class="kw-tip" data-word="state" data-def="Data that your app needs to remember and display — like a counter value, a logged-in user, or a list of items.">state</span> lives here. One source of truth.</p>
         </div>
         <div class="card card-blue">
           <strong style="font-family:var(--font-mono);color:var(--accent4);">Action</strong>
-          <p style="color:var(--muted);font-size:0.85rem;margin-top:0.3rem;">A plain object: <code style="color:var(--accent4);">{ type: "INCREMENT" }</code>. Describes what happened.</p>
+          <p style="color:var(--muted);font-size:0.85rem;margin-top:0.3rem;">A plain <span class="kw-tip" data-word="object" data-def="In JS, a collection of key-value pairs: { name: 'Ali', age: 20 }. An Action is just an object with a 'type' key.">object</span>: <code style="color:var(--accent4);">{ type: "INCREMENT" }</code>. Describes what happened.</p>
         </div>
         <div class="card card-green">
           <strong style="font-family:var(--font-mono);color:var(--accent2);">Reducer</strong>
-          <p style="color:var(--muted);font-size:0.85rem;margin-top:0.3rem;">A <em>pure function</em>: takes <code>(state, action)</code> → returns new state. <strong style="color:var(--accent3);">Never mutates!</strong></p>
+          <p style="color:var(--muted);font-size:0.85rem;margin-top:0.3rem;">A <span class="kw-tip" data-word="pure function" data-def="A function that: (1) always returns the same output for the same input, and (2) never changes anything outside itself (no side effects).">pure function</span>: takes <code>(state, action)</code> → returns new state. <strong style="color:var(--accent3);">Never <span class="kw-tip" data-word="mutates" data-def="Mutating means directly changing an existing value. Reducers must NOT do this — instead they return a brand new copy of state.">mutates</span>!</strong></p>
         </div>
         <div class="card card-red">
           <strong style="font-family:var(--font-mono);color:var(--accent3);">Dispatch</strong>
@@ -674,7 +708,7 @@
           <button class="demo-btn" onclick="reduxReset()" style="font-size:0.7rem;width:auto;padding:0 0.75rem;">RESET</button>
           <button class="demo-btn" onclick="reduxIncrement()">+</button>
         </div>
-        <div class="counter-log" id="counterLog"><div class="log-entry"><span style="color:var(--accent3)">dispatch</span>(<span style="color:var(--accent)">reset()</span>) → state: <span style="color:var(--accent4)">0</span></div><div class="log-entry"><span style="color:var(--accent3)">dispatch</span>(<span style="color:var(--accent)">increment()</span>) → state: <span style="color:var(--accent4)">1</span></div>
+        <div class="counter-log" id="counterLog">
           <div style="color:var(--muted);">// dispatch log will appear here</div>
         </div>
       </div>
@@ -688,14 +722,14 @@
   <span class="prop">name</span>: <span class="str">"counter"</span>,
   <span class="prop">initialState</span>: <span class="num">0</span>,
   <span class="prop">reducers</span>: {
-    <span class="fn">increment</span>: (<span class="prop">state</span>) =&gt; state + <span class="num">1</span>,
-    <span class="fn">decrement</span>: (<span class="prop">state</span>) =&gt; state - <span class="num">1</span>,
+    <span class="fn">increment</span>: (<span class="prop">state</span>) => state + <span class="num">1</span>,
+    <span class="fn">decrement</span>: (<span class="prop">state</span>) => state - <span class="num">1</span>,
   }
 })
 <span class="kw">export const</span> { <span class="fn">increment</span>, <span class="fn">decrement</span> } = counterSlice.actions
 
 <span class="cm">// In your component:</span>
-<span class="kw">const</span> count = <span class="fn">useSelector</span>(s =&gt; s.counter) <span class="cm">// READ</span>
+<span class="kw">const</span> count = <span class="fn">useSelector</span>(s => s.counter) <span class="cm">// READ</span>
 <span class="kw">const</span> dispatch = <span class="fn">useDispatch</span>()              <span class="cm">// WRITE</span>
 <span class="fn">dispatch</span>(<span class="fn">increment</span>())</pre></div>
       </div>
@@ -742,13 +776,13 @@
   <div class="reveal" style="margin-top:3rem;">
     <h3>Redux vs Context API <span class="badge badge-exam">⚡ yeh padhlo, kaam ayega</span></h3>
     <table class="compare-table" style="margin-top:1rem;">
-      <tbody><tr><th>Feature</th><th>Context API</th><th>Redux</th></tr>
+      <tr><th>Feature</th><th><span class="kw-tip" data-word="Context API" data-def="React's built-in way to share data across components without passing props manually. Great for small apps like themes or auth.">Context API</span></th><th>Redux</th></tr>
       <tr><td>Best for</td><td>Small apps</td><td>Large apps</td></tr>
-      <tr><td>Debugging</td><td>Limited</td><td>Excellent (DevTools)</td></tr>
-      <tr><td>Async</td><td>Manual</td><td>Built-in (thunks)</td></tr>
+      <tr><td>Debugging</td><td>Limited</td><td>Excellent (<span class="kw-tip" data-word="DevTools" data-def="A browser extension for Redux that lets you inspect every state change, replay actions, and time-travel debug your app.">DevTools</span>)</td></tr>
+      <tr><td><span class="kw-tip" data-word="Async" data-def="Short for asynchronous — code that runs in the background without blocking the rest of your app. E.g. fetching data from an API.">Async</span></td><td>Manual</td><td>Built-in (<span class="kw-tip" data-word="thunks" data-def="Special Redux functions that let you write async logic (like API calls) before dispatching an action to update the store.">thunks</span>)</td></tr>
       <tr><td>Performance</td><td>Can degrade</td><td>Optimized</td></tr>
-      <tr><td>Boilerplate</td><td>Minimal</td><td>More setup</td></tr>
-    </tbody></table>
+      <tr><td><span class="kw-tip" data-word="Boilerplate" data-def="Repetitive setup code you have to write before doing any real work. Redux needs more of it than Context API.">Boilerplate</span></td><td>Minimal</td><td>More setup</td></tr>
+    </table>
   </div>
 </section>
 
@@ -767,27 +801,27 @@
     <div class="card" style="border-top:3px solid #61DAFB;">
       <div style="font-size:2rem;margin-bottom:0.5rem;">⚛️</div>
       <h3 style="color:#61DAFB;">React</h3>
-      <p style="color:var(--muted);font-size:0.85rem;">Component-based UI, Virtual DOM, one-way data flow. You already know the basics!</p>
+      <p style="color:var(--muted);font-size:0.85rem;"><span class="kw-tip" data-word="Component-based UI" data-def="You build your webpage by combining small, reusable pieces called components — instead of writing one giant HTML file.">Component-based</span> UI, <span class="kw-tip" data-word="Virtual DOM" data-def="A lightweight copy of the real HTML page that React keeps in memory. When state changes, React compares old vs new virtual DOM and only updates what actually changed — making it fast.">Virtual DOM</span>, <span class="kw-tip" data-word="one-way data flow" data-def="Data flows in one direction only: from parent component down to child via props. Children can't push data back up directly.">one-way data flow</span>.</p>
     </div>
     <div class="card" style="border-top:3px solid #764ABC;">
       <div style="font-size:2rem;margin-bottom:0.5rem;">🗂️</div>
       <h3 style="color:#764ABC;">Redux</h3>
-      <p style="color:var(--muted);font-size:0.85rem;">Global state management (covered in Unit 6).</p>
+      <p style="color:var(--muted);font-size:0.85rem;">Global <span class="kw-tip" data-word="state management" data-def="Deciding where your app's data lives and how it gets updated. Redux puts all shared state in one central store.">state management</span> (covered in Unit 6).</p>
     </div>
     <div class="card" style="border-top:3px solid #0769AD;">
       <div style="font-size:2rem;margin-bottom:0.5rem;">💲</div>
       <h3 style="color:#0769AD;">jQuery</h3>
-      <p style="color:var(--muted);font-size:0.85rem;">Simplified DOM manipulation. <code style="font-family:var(--font-mono);font-size:0.75rem;">$("#btn").click(...)</code></p>
+      <p style="color:var(--muted);font-size:0.85rem;">Simplified <span class="kw-tip" data-word="DOM manipulation" data-def="Using JavaScript to add, remove, or change HTML elements on a live webpage. E.g. changing text, hiding a div, or adding a class.">DOM manipulation</span>. <code style="font-family:var(--font-mono);font-size:0.75rem;">$("#btn").click(...)</code></p>
     </div>
     <div class="card" style="border-top:3px solid #7952B3;">
       <div style="font-size:2rem;margin-bottom:0.5rem;">🎨</div>
       <h3 style="color:#7952B3;">Bootstrap</h3>
-      <p style="color:var(--muted);font-size:0.85rem;">Ready-made CSS. Classes like <code style="font-family:var(--font-mono);font-size:0.75rem;">btn btn-primary</code>, grid system.</p>
+      <p style="color:var(--muted);font-size:0.85rem;">Ready-made CSS. Classes like <code style="font-family:var(--font-mono);font-size:0.75rem;">btn btn-primary</code>, <span class="kw-tip" data-word="grid system" data-def="Bootstrap's layout system that divides the page into 12 columns. You assign classes like col-md-6 to control how wide elements are on different screen sizes.">grid system</span>.</p>
     </div>
     <div class="card" style="border-top:3px solid var(--accent2);">
       <div style="font-size:2rem;margin-bottom:0.5rem;">🌐</div>
       <h3 style="color:var(--accent2);">Axios / Fetch</h3>
-      <p style="color:var(--muted);font-size:0.85rem;">Making API calls to backend servers.</p>
+      <p style="color:var(--muted);font-size:0.85rem;">Making <span class="kw-tip" data-word="API calls" data-def="Sending a request from your frontend to a backend server to get or send data. Like asking a waiter for your food — you request, they respond.">API calls</span> to backend servers.</p>
     </div>
   </div>
 
@@ -807,10 +841,10 @@
 <span class="fn">setCount</span>(count + <span class="num">1</span>)
 
 <span class="cm">// EFFECT — run code on mount / when deps change</span>
-<span class="fn">useEffect</span>(() =&gt; {
+<span class="fn">useEffect</span>(() => {
   <span class="fn">fetch</span>(<span class="str">"https://api.example.com/users"</span>)
-    .<span class="fn">then</span>(res =&gt; res.<span class="fn">json</span>())
-    .<span class="fn">then</span>(data =&gt; <span class="fn">setUsers</span>(data))
+    .<span class="fn">then</span>(res => res.<span class="fn">json</span>())
+    .<span class="fn">then</span>(data => <span class="fn">setUsers</span>(data))
 }, []) <span class="cm">// [] = run once on mount</span></pre></div>
       </div>
     </div>
@@ -820,14 +854,14 @@
         <div class="card" style="display:flex;align-items:center;gap:1rem;">
           <span style="font-size:1.5rem;">1️⃣</span>
           <div>
-            <div style="font-weight:500;font-size:0.9rem;">State changes</div>
+            <div style="font-weight:500;font-size:0.9rem;"><span class="kw-tip" data-word="State" data-def="Data that lives inside a component and can change over time. When state changes, React re-renders that component automatically.">State</span> changes</div>
             <div style="color:var(--muted);font-size:0.8rem;">setCount(count + 1) called</div>
           </div>
         </div>
         <div class="card" style="display:flex;align-items:center;gap:1rem;">
           <span style="font-size:1.5rem;">2️⃣</span>
           <div>
-            <div style="font-weight:500;font-size:0.9rem;">Virtual DOM diff</div>
+            <div style="font-weight:500;font-size:0.9rem;">Virtual DOM <span class="kw-tip" data-word="diff" data-def="Short for 'difference'. React's algorithm that compares the old and new virtual DOM trees to find exactly what changed — so it doesn't update the whole page.">diff</span></div>
             <div style="color:var(--muted);font-size:0.8rem;">React compares old vs new virtual tree</div>
           </div>
         </div>
@@ -835,12 +869,12 @@
           <span style="font-size:1.5rem;">3️⃣</span>
           <div>
             <div style="font-weight:500;font-size:0.9rem;">Minimal update</div>
-            <div style="color:var(--muted);font-size:0.8rem;">Only changed parts update in real DOM</div>
+            <div style="color:var(--muted);font-size:0.8rem;">Only changed parts update in real <span class="kw-tip" data-word="DOM" data-def="Document Object Model — the browser's live representation of your HTML. JavaScript can read and change it to update what users see.">DOM</span></div>
           </div>
         </div>
       </div>
       <div class="callout" style="margin-top:1rem;">
-        <strong>One-way data flow:</strong> Data flows <em>down</em> (parent → child via props). Events go <em>up</em> (child calls parent's callback).
+        <strong>One-way data flow:</strong> Data flows <em>down</em> (parent → child via <span class="kw-tip" data-word="props" data-def="Short for 'properties'. Data you pass into a component from its parent — like arguments to a function. Read-only inside the child.">props</span>). Events go <em>up</em> (child calls parent's <span class="kw-tip" data-word="callback" data-def="A function passed as a prop to a child component, so the child can 'call back' to the parent when something happens — like a button click.">callback</span>).
       </div>
     </div>
   </div>
@@ -855,30 +889,30 @@
 
   <div class="reveal two-col">
     <div>
-      <p style="color:var(--muted);margin-bottom:2rem;">npm is like the <strong>App Store for JavaScript code</strong>. Instead of writing a server from scratch, you just install Express. Instead of writing date logic, you install moment. Your project's "shopping list" of these packages is <code style="font-family:var(--font-mono);color:var(--accent);">package.json</code>.</p>
+      <p style="color:var(--muted);margin-bottom:2rem;">npm is like the <strong>App Store for JavaScript code</strong>. Instead of writing a server from scratch, you just install <span class="kw-tip" data-word="Express" data-def="A lightweight Node.js framework for building web servers. It handles routing, middleware, and sending responses — without tons of boilerplate code.">Express</span>. Instead of writing date logic, you install moment. Your project's "shopping list" of these <span class="kw-tip" data-word="packages" data-def="Bundles of reusable JavaScript code written by other developers. You install them with npm and import them into your project.">packages</span> is <code style="font-family:var(--font-mono);color:var(--accent);">package.json</code>.</p>
 
       <h3>3 Key Files</h3>
       <div style="display:flex;flex-direction:column;gap:0.75rem;margin-top:1rem;">
         <div class="card card-accent">
           <code style="font-family:var(--font-mono);color:var(--accent);font-size:0.85rem;">package.json</code>
-          <p style="color:var(--muted);font-size:0.82rem;margin-top:0.3rem;">The heart. Stores name, version, scripts, dependencies. Commit this.</p>
+          <p style="color:var(--muted);font-size:0.82rem;margin-top:0.3rem;">The heart. Stores name, version, scripts, <span class="kw-tip" data-word="dependencies" data-def="Packages your app needs to actually run in production — like Express or Mongoose. Installed with: npm install package-name">dependencies</span>. <span class="kw-tip" data-word="Commit this" data-def="'Commit' means saving a file to Git version control. You SHOULD commit package.json so others know what packages your project needs.">Commit this</span>.</p>
         </div>
         <div class="card card-green">
           <code style="font-family:var(--font-mono);color:var(--accent2);font-size:0.85rem;">package-lock.json</code>
-          <p style="color:var(--muted);font-size:0.82rem;margin-top:0.3rem;">Locks exact versions so everyone on your team gets the same code. Commit this too.</p>
+          <p style="color:var(--muted);font-size:0.82rem;margin-top:0.3rem;">Locks exact <span class="kw-tip" data-word="versions" data-def="Software version numbers like 4.18.2 — major.minor.patch. Locking versions ensures everyone on your team uses identical code.">versions</span> so everyone on your team gets the same code. Commit this too.</p>
         </div>
         <div class="card card-red">
           <code style="font-family:var(--font-mono);color:var(--accent3);font-size:0.85rem;">node_modules/</code>
-          <p style="color:var(--muted);font-size:0.82rem;margin-top:0.3rem;">Where packages actually live. <strong style="color:var(--accent3);">NEVER push to GitHub!</strong> Add to .gitignore.</p>
+          <p style="color:var(--muted);font-size:0.82rem;margin-top:0.3rem;">Where packages actually live. <strong style="color:var(--accent3);">NEVER push to <span class="kw-tip" data-word="GitHub" data-def="A website where developers store and share code using Git. node_modules can have 100,000+ files — pushing it would be a disaster.">GitHub</span>!</strong> Add to <span class="kw-tip" data-word=".gitignore" data-def="A file in your project that tells Git: 'ignore these files/folders'. Add node_modules/ here so it never gets uploaded."><code>.gitignore</code></span>.</p>
         </div>
       </div>
 
-      <h3 style="margin-top:2rem;">dependencies vs devDependencies</h3>
+      <h3 style="margin-top:2rem;"><span class="kw-tip" data-word="dependencies" data-def="Listed in package.json under 'dependencies'. These are needed when your app runs live for real users.">dependencies</span> vs <span class="kw-tip" data-word="devDependencies" data-def="Listed under 'devDependencies'. Only needed while you're coding — not shipped to production. E.g. nodemon, eslint.">devDependencies</span></h3>
       <table class="compare-table" style="margin-top:1rem;">
-        <tbody><tr><th>Type</th><th>When needed</th><th>Example</th></tr>
-        <tr><td><code style="color:var(--accent2);">dependencies</code></td><td>In production</td><td>express, mongoose</td></tr>
-        <tr><td><code style="color:var(--muted);">devDependencies</code></td><td>Dev only</td><td>nodemon, eslint</td></tr>
-      </tbody></table>
+        <tr><th>Type</th><th>When needed</th><th>Example</th></tr>
+        <tr><td><code style="color:var(--accent2);">dependencies</code></td><td>In <span class="kw-tip" data-word="production" data-def="The live version of your app that real users access — deployed on a server, not just running on your laptop.">production</span></td><td>express, mongoose</td></tr>
+        <tr><td><code style="color:var(--muted);">devDependencies</code></td><td>Dev only</td><td><span class="kw-tip" data-word="nodemon" data-def="A dev tool that auto-restarts your Node server every time you save a file. Saves you from manually restarting during development.">nodemon</span>, eslint</td></tr>
+      </table>
 
       <h3 style="margin-top:2rem;">Version Symbols <span class="badge badge-exam">⚡ yeh padhlo, kaam ayega</span></h3>
       <div style="display:flex;gap:0.75rem;margin-top:0.75rem;flex-wrap:wrap;">
@@ -941,22 +975,22 @@
     <div>
       <div class="section-line"></div>
       <h3>Node.js — JS outside the browser</h3>
-      <p style="color:var(--muted);margin-bottom:1.5rem;">You know JS runs in Chrome. Node.js lets you run JS on a <em>server</em> (or your computer). It's built on Chrome's V8 engine but has no DOM — instead, it has access to files, databases, and networks.</p>
+      <p style="color:var(--muted);margin-bottom:1.5rem;">You know JS runs in Chrome. Node.js lets you run JS on a <em><span class="kw-tip" data-word="server" data-def="A computer (or program) that listens for requests from clients (browsers/apps) and sends back responses — like data, files, or HTML pages.">server</span></em> (or your computer). It's built on Chrome's <span class="kw-tip" data-word="V8 engine" data-def="Google's JavaScript engine inside Chrome. It compiles JS to machine code so it runs fast. Node.js uses the same engine — just without the browser around it.">V8 engine</span> but has no <span class="kw-tip" data-word="DOM" data-def="The browser's live HTML tree. Node doesn't have one — it has no browser. Instead it has access to files, networks, and databases.">DOM</span> — instead, it has access to files, databases, and networks.</p>
       <div class="callout">
-        <strong>Key trait:</strong> Node is <em>asynchronous</em> and <em>non-blocking</em>. It can handle thousands of requests without freezing, because it doesn't wait around for slow operations.
+        <strong>Key trait:</strong> Node is <span class="kw-tip" data-word="asynchronous" data-def="Code that doesn't freeze and wait. It starts a task (like a DB query), then moves on to handle other requests. When the task finishes, it comes back with the result.">asynchronous</span> and <span class="kw-tip" data-word="non-blocking" data-def="The server doesn't block (freeze) while waiting for slow things like database reads or file writes. It handles other requests in the meantime.">non-blocking</span>. It can handle thousands of requests without freezing, because it doesn't wait around for slow operations.
       </div>
       <h3 style="margin-top:2rem;">Express.js — the thin wrapper</h3>
-      <p style="color:var(--muted);">Node's built-in server is verbose. Express wraps it in clean, readable syntax — routing, middleware, and response helpers in a few lines.</p>
+      <p style="color:var(--muted);">Node's built-in server is verbose. Express wraps it in clean, readable syntax — <span class="kw-tip" data-word="routing" data-def="Matching a specific URL + HTTP method to the right piece of code. E.g. GET /users → runs the 'get all users' function.">routing</span>, <span class="kw-tip" data-word="middleware" data-def="Functions that run between a request arriving and the response being sent. They can log, authenticate, parse data, etc. Must call next() to pass control forward.">middleware</span>, and response helpers in a few lines.</p>
     </div>
     <div>
       <h3>HTTP Methods</h3>
       <table class="compare-table" style="margin-top:1rem;">
-        <tbody><tr><th>Method</th><th>Purpose</th><th>Like...</th></tr>
+        <tr><th>Method</th><th>Purpose</th><th>Like...</th></tr>
         <tr><td><code style="color:var(--accent2);">GET</code></td><td>Fetch data</td><td>Reading</td></tr>
         <tr><td><code style="color:var(--accent4);">POST</code></td><td>Send/create data</td><td>Writing</td></tr>
         <tr><td><code style="color:#FFB366;">PUT</code></td><td>Update data</td><td>Replacing</td></tr>
         <tr><td><code style="color:var(--accent3);">DELETE</code></td><td>Remove data</td><td>Deleting</td></tr>
-      </tbody></table>
+      </table>
     </div>
   </div>
 
@@ -975,21 +1009,21 @@
 app.<span class="fn">use</span>(express.<span class="fn">json</span>())
 
 <span class="cm">// Routes</span>
-app.<span class="fn">get</span>(<span class="str">"/"</span>, (req, res) =&gt; {
+app.<span class="fn">get</span>(<span class="str">"/"</span>, (req, res) => {
   res.<span class="fn">send</span>(<span class="str">"Hello World!"</span>)
 })
 
-app.<span class="fn">post</span>(<span class="str">"/login"</span>, (req, res) =&gt; {
+app.<span class="fn">post</span>(<span class="str">"/login"</span>, (req, res) => {
   <span class="kw">const</span> { email } = req.body <span class="cm">// from JSON body</span>
   res.<span class="fn">json</span>({ message: <span class="str">`Welcome, ${email}`</span> })
 })
 
 <span class="cm">// URL param → /user/42 → req.params.id = "42"</span>
-app.<span class="fn">get</span>(<span class="str">"/user/:id"</span>, (req, res) =&gt; {
+app.<span class="fn">get</span>(<span class="str">"/user/:id"</span>, (req, res) => {
   res.<span class="fn">send</span>(req.params.id)
 })
 
-app.<span class="fn">listen</span>(<span class="num">3000</span>, () =&gt;
+app.<span class="fn">listen</span>(<span class="num">3000</span>, () =>
   console.<span class="fn">log</span>(<span class="str">"Server running on port 3000"</span>)
 )</pre></div>
       </div>
@@ -997,7 +1031,7 @@ app.<span class="fn">listen</span>(<span class="num">3000</span>, () =&gt;
 
     <div>
       <h3>Middleware Pipeline <span class="badge badge-exam">⚡ yeh padhlo, kaam ayega</span></h3>
-      <p style="color:var(--muted);font-size:0.85rem;margin:0.75rem 0 1.5rem;">Middleware functions run <em>between</em> the request arriving and the response being sent. They MUST call <code style="font-family:var(--font-mono);color:var(--accent3);">next()</code> or the request hangs forever.</p>
+      <p style="color:var(--muted);font-size:0.85rem;margin:0.75rem 0 1.5rem;"><span class="kw-tip" data-word="Middleware" data-def="Functions that sit between the incoming request and your final response. They run in sequence. Each one does something (log, check auth, parse JSON) then calls next() to hand off to the next one.">Middleware</span> functions run <em>between</em> the <span class="kw-tip" data-word="request" data-def="The incoming message from a browser or app — includes the URL, HTTP method (GET/POST), headers, and any body data sent.">request</span> arriving and the <span class="kw-tip" data-word="response" data-def="What your server sends back to the client — could be JSON data, HTML, a status code, or an error message.">response</span> being sent. They MUST call <code style="font-family:var(--font-mono);color:var(--accent3);">next()</code> or the request hangs forever.</p>
 
       <div class="pipeline" id="pipeline">
         <div class="pipe-node" data-step="0">
@@ -1019,7 +1053,7 @@ app.<span class="fn">listen</span>(<span class="num">3000</span>, () =&gt;
           <span class="pipe-icon">🔐</span>
           <div class="pipe-info">
             <div class="pipe-title">Auth Middleware</div>
-            <div class="pipe-desc">verify JWT token</div>
+            <div class="pipe-desc">verify <span class="kw-tip" data-word="JWT token" data-def="JSON Web Token — a secure, encoded string used to prove who you are. Like a digital ID card your server issues after login and checks on every request.">JWT token</span></div>
           </div>
           <span class="pipe-badge must">calls next()</span>
         </div>
@@ -1046,7 +1080,7 @@ app.<span class="fn">listen</span>(<span class="num">3000</span>, () =&gt;
           <div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div>
           <span class="code-label">Custom Middleware</span>
         </div>
-        <div class="code-body"><pre>app.<span class="fn">use</span>((req, res, <span class="prop">next</span>) =&gt; {
+        <div class="code-body"><pre>app.<span class="fn">use</span>((req, res, <span class="prop">next</span>) => {
   console.<span class="fn">log</span>(<span class="str">`${req.method} ${req.url}`</span>)
   <span class="fn">next</span>() <span class="cm">// ← MUST call this!</span>
 })</pre></div>
@@ -1065,18 +1099,18 @@ app.<span class="fn">listen</span>(<span class="num">3000</span>, () =&gt;
   <div class="reveal two-col" style="margin-bottom:3rem;">
     <div>
       <div class="section-line"></div>
-      <h3>MongoDB — NoSQL Database</h3>
-      <p style="color:var(--muted);margin-bottom:1.5rem;">Traditional SQL databases store data in rigid tables with fixed columns. MongoDB stores data as <strong>JSON-like documents</strong> — flexible, nested, and schema-free by default.</p>
+      <h3>MongoDB — <span class="kw-tip" data-word="NoSQL" data-def="Databases that don't use tables and rows like SQL. MongoDB stores data as flexible JSON-like documents — great for data that doesn't have a fixed structure.">NoSQL</span> Database</h3>
+      <p style="color:var(--muted);margin-bottom:1.5rem;">Traditional <span class="kw-tip" data-word="SQL databases" data-def="Databases like MySQL or PostgreSQL that store data in tables with fixed columns and rows. Strict structure, but powerful for complex queries.">SQL databases</span> store data in rigid tables with fixed columns. MongoDB stores data as <strong><span class="kw-tip" data-word="JSON-like documents" data-def="Data stored like a JavaScript object: { name: 'Ali', age: 20, courses: ['CS', 'Math'] }. Each document can have different fields.">JSON-like documents</span></strong> — flexible, nested, and <span class="kw-tip" data-word="schema-free" data-def="No enforced structure by default — you can save any shape of data. Mongoose adds the schema layer back when you need structure and validation.">schema-free</span> by default.</p>
       <table class="compare-table" style="margin-bottom:1.5rem;">
-        <tbody><tr><th>SQL</th><th>MongoDB</th></tr>
-        <tr><td>Table</td><td>Collection</td></tr>
-        <tr><td>Row</td><td>Document</td></tr>
-        <tr><td>Column</td><td>Field</td></tr>
-        <tr><td>Fixed schema</td><td>Flexible schema</td></tr>
-        <tr><td>JOINs</td><td>Embedded docs</td></tr>
-      </tbody></table>
+        <tr><th>SQL</th><th>MongoDB</th></tr>
+        <tr><td>Table</td><td><span class="kw-tip" data-word="Collection" data-def="MongoDB's version of a table. A collection holds many documents — e.g. a 'students' collection holds all student documents.">Collection</span></td></tr>
+        <tr><td>Row</td><td><span class="kw-tip" data-word="Document" data-def="A single record in MongoDB, stored as a JSON-like object. E.g. one student's data: { name: 'Ali', age: 20 }">Document</span></td></tr>
+        <tr><td>Column</td><td><span class="kw-tip" data-word="Field" data-def="A single key-value pair inside a document — like 'name' or 'age'. Same idea as a column in SQL.">Field</span></td></tr>
+        <tr><td>Fixed <span class="kw-tip" data-word="schema" data-def="A blueprint defining what fields a document should have and what type they are. In Mongoose, you define this explicitly.">schema</span></td><td>Flexible schema</td></tr>
+        <tr><td><span class="kw-tip" data-word="JOINs" data-def="SQL's way to combine data from two tables. MongoDB doesn't use JOINs — instead you can embed related data right inside the document.">JOINs</span></td><td>Embedded docs</td></tr>
+      </table>
       <div class="callout">
-        <strong>Mongoose</strong> adds a schema and validation layer on top of MongoDB. Without Mongoose, there's nothing stopping someone from saving garbage data in your database.
+        <strong>Mongoose</strong> adds a <span class="kw-tip" data-word="schema" data-def="A blueprint that defines what fields your documents must have, their types, and any validation rules (e.g. required: true, min: 18).">schema</span> and <span class="kw-tip" data-word="validation" data-def="Rules that check data before saving to the DB. E.g. 'age must be a number and at least 18'. Rejects bad data automatically.">validation</span> layer on top of MongoDB. Without Mongoose, there's nothing stopping someone from saving garbage data in your database.
       </div>
     </div>
     <div>
@@ -1154,7 +1188,7 @@ mongoose.<span class="fn">connect</span>(<span class="str">"mongodb://127.0.0.1/
     <div>
       <div class="section-line"></div>
       <h3>The Folder Structure</h3>
-      <p style="color:var(--muted);margin-bottom:1.5rem;">This is the <strong>industry standard</strong> MVC pattern. Every professional Node.js project uses something close to this:</p>
+      <p style="color:var(--muted);margin-bottom:1.5rem;">This is the <strong>industry standard</strong> <span class="kw-tip" data-word="MVC pattern" data-def="Model-View-Controller — a way to organise code by separating: the data (Model), the display (View), and the business logic (Controller). Keeps code clean and maintainable.">MVC pattern</span>. Every professional Node.js project uses something close to this:</p>
       <div class="card" style="padding:1.5rem 2rem;" id="folderTree">
         <div class="tree">
           <div class="tree-item" id="ti0"><span class="tree-icon">📁</span><span class="tree-folder">backend/</span></div>
@@ -1177,35 +1211,35 @@ mongoose.<span class="fn">connect</span>(<span class="str">"mongodb://127.0.0.1/
           <span style="font-size:1.5rem;">1️⃣</span>
           <div>
             <div style="font-weight:600;font-size:0.9rem;font-family:var(--font-mono);color:var(--accent);">server.js</div>
-            <div style="color:var(--muted);font-size:0.8rem;">Connects DB, sets up middleware, loads routes</div>
+            <div style="color:var(--muted);font-size:0.8rem;">Connects DB, sets up <span class="kw-tip" data-word="middleware" data-def="Functions that process every request before it reaches your routes — like express.json() to parse the body, or a logger.">middleware</span>, loads routes</div>
           </div>
         </div>
         <div class="card" style="display:flex;gap:1rem;border-radius:0;border-top:none;border-bottom:none;">
           <span style="font-size:1.5rem;">2️⃣</span>
           <div>
             <div style="font-weight:600;font-size:0.9rem;font-family:var(--font-mono);color:var(--accent4);">routes/studentRoutes.js</div>
-            <div style="color:var(--muted);font-size:0.8rem;">Maps URL + method to controller function</div>
+            <div style="color:var(--muted);font-size:0.8rem;">Maps URL + <span class="kw-tip" data-word="HTTP method" data-def="The type of request: GET (fetch), POST (create), PUT (update), DELETE (remove). The route matches both the URL AND the method.">method</span> to controller function</div>
           </div>
         </div>
         <div class="card" style="display:flex;gap:1rem;border-radius:0;border-top:none;border-bottom:none;">
           <span style="font-size:1.5rem;">3️⃣</span>
           <div>
             <div style="font-weight:600;font-size:0.9rem;font-family:var(--font-mono);color:var(--accent2);">controllers/studentController.js</div>
-            <div style="color:var(--muted);font-size:0.8rem;">Business logic — calls model methods</div>
+            <div style="color:var(--muted);font-size:0.8rem;"><span class="kw-tip" data-word="Business logic" data-def="The actual rules of what your app does — validate input, call the database, format the response. Not UI, not DB setup — the logic in between.">Business logic</span> — calls model methods</div>
           </div>
         </div>
         <div class="card" style="display:flex;gap:1rem;border-radius:0;border-top:none;border-bottom:none;">
           <span style="font-size:1.5rem;">4️⃣</span>
           <div>
             <div style="font-weight:600;font-size:0.9rem;font-family:var(--font-mono);color:#c792ea;">models/Student.js</div>
-            <div style="color:var(--muted);font-size:0.8rem;">Talks to MongoDB via Mongoose</div>
+            <div style="color:var(--muted);font-size:0.8rem;">Talks to <span class="kw-tip" data-word="MongoDB" data-def="The NoSQL database where your data is actually stored on disk. Mongoose (the model) is the layer between your JS code and MongoDB.">MongoDB</span> via <span class="kw-tip" data-word="Mongoose" data-def="An ODM library that adds schemas, validation, and easy query methods on top of the raw MongoDB driver. Lets you write Student.find() instead of raw DB queries.">Mongoose</span></div>
           </div>
         </div>
         <div class="card" style="display:flex;gap:1rem;border-radius:0 0 6px 6px;border-top:none;">
           <span style="font-size:1.5rem;">5️⃣</span>
           <div>
             <div style="font-weight:600;font-size:0.9rem;">Response sent</div>
-            <div style="color:var(--muted);font-size:0.8rem;">res.json(data) back to client</div>
+            <div style="color:var(--muted);font-size:0.8rem;"><span class="kw-tip" data-word="res.json(data)" data-def="Sends a JSON response back to the client. res = response object, .json() converts the data to JSON format and sets the right headers automatically.">res.json(data)</span> back to client</div>
           </div>
         </div>
       </div>
@@ -1249,7 +1283,7 @@ router.<span class="fn">delete</span>(<span class="str">"/:id"</span>, deleteStu
         <div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div>
         <span class="code-label">studentController.js</span>
       </div>
-      <div class="code-body"><pre><span class="kw">const</span> getAllStudents = <span class="kw">async</span> (req, res) =&gt; {
+      <div class="code-body"><pre><span class="kw">const</span> getAllStudents = <span class="kw">async</span> (req, res) => {
   <span class="kw">try</span> {
     <span class="kw">const</span> students = <span class="kw">await</span> Student.<span class="fn">find</span>()
     res.<span class="fn">json</span>(students)
@@ -1275,7 +1309,7 @@ router.<span class="fn">delete</span>(<span class="str">"/:id"</span>, deleteStu
     <div class="cheat-item"><div class="cheat-concept">useDispatch</div><div class="cheat-def">Trigger an action → updates the store</div></div>
     <div class="cheat-item"><div class="cheat-concept">npm init -y</div><div class="cheat-def">Creates package.json instantly</div></div>
     <div class="cheat-item"><div class="cheat-concept">--save-dev</div><div class="cheat-def">Install as devDependency (dev only)</div></div>
-    <div class="cheat-item"><div class="cheat-concept">Middleware</div><div class="cheat-def">Runs between request &amp; response. Must call next()</div></div>
+    <div class="cheat-item"><div class="cheat-concept">Middleware</div><div class="cheat-def">Runs between request & response. Must call next()</div></div>
     <div class="cheat-item"><div class="cheat-concept">Mongoose</div><div class="cheat-def">Adds schema + validation on top of MongoDB</div></div>
     <div class="cheat-item"><div class="cheat-concept">REST API</div><div class="cheat-def">CRUD via HTTP methods on structured routes</div></div>
     <div class="cheat-item"><div class="cheat-concept">node_modules/</div><div class="cheat-def">Never push to GitHub — add to .gitignore</div></div>
@@ -1475,7 +1509,48 @@ window.addEventListener('scroll', () => {
     a.style.color = a.getAttribute('href') === '#' + current ? 'var(--accent)' : '';
   });
 });
+
+// ── KEYWORD TOOLTIP ENGINE ────────────────
+const kwTip    = document.getElementById('kwTooltip');
+const ttWord   = document.getElementById('ttWord');
+const ttDef    = document.getElementById('ttDef');
+let hideTimer  = null;
+
+document.querySelectorAll('.kw-tip').forEach(el => {
+  el.addEventListener('mouseenter', (e) => {
+    clearTimeout(hideTimer);
+    ttWord.textContent = el.dataset.word;
+    ttDef.textContent  = el.dataset.def;
+    kwTip.classList.add('visible');
+    positionTooltip(e);
+  });
+
+  el.addEventListener('mousemove', positionTooltip);
+
+  el.addEventListener('mouseleave', () => {
+    hideTimer = setTimeout(() => kwTip.classList.remove('visible'), 120);
+  });
+});
+
+function positionTooltip(e) {
+  const PAD = 12;
+  const TW  = kwTip.offsetWidth  || 260;
+  const TH  = kwTip.offsetHeight || 80;
+  const vw  = window.innerWidth;
+  const vh  = window.innerHeight;
+
+  let x = e.clientX - TW / 2;
+  let y = e.clientY - TH - PAD - 8;
+
+  // flip below cursor if not enough room above
+  if (y < PAD) y = e.clientY + PAD + 8;
+
+  // clamp horizontal
+  x = Math.max(PAD, Math.min(x, vw - TW - PAD));
+
+  kwTip.style.left = x + 'px';
+  kwTip.style.top  = y + 'px';
+}
 </script>
-
-
-</body></html>
+</body>
+</html>
